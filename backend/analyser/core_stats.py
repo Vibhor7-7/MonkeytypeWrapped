@@ -241,11 +241,28 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     }
 
     print(f"Accuracy: {round(overall_accuracy, 2)}% overall, {int(total_errors)} total errors ")
+
+    # Slide 11: Share card 
+    share_card = {
+        "year": df['year'].max(),
+        "headline": f"I typed {int(total_words):,} words in {df['year'].max()}!",
+        "topStats": [
+            {"label": "Average WPM", "value": f"{df['wpm'].mean():.1f}"},
+            {"label": "Peak WPM", "value": f"{all_time_pb:.1f}"},
+            {"label": "Tests Taken", "value": f"{total_tests:,}"},
+            {"label": "Active Days", "value": f"{unique_dates}"}
+        ]
+    }
+
+    print("Share Card Generated")
+
     return {
         "hook": hook_data,
         "yearInNumbers": year_in_numbers,
         "peakPerformance": peak_performance,
-        "quirks": quirks
+        "quirks": quirks, 
+        "accuracy": accuracy_data, 
+        "shareCard": share_card
     }
 
 
