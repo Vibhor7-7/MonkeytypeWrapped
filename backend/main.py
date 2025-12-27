@@ -12,6 +12,7 @@ sys.path.append(str(Path(__file__).parent))
 # TODO: Uncomment these imports as we implement each module
 from analyser import parser
 from analyser import core_stats
+from analyser import clustering
 # from analyser import journey, timing, warmup, comparisons
 # from models.schemas import WrappedData
 
@@ -19,7 +20,7 @@ from analyser import core_stats
 app = FastAPI(
     title="MonkeyType Wrapped API",
     description="Analyze your typing stats and get a Spotify Wrapped-style breakdown",
-    version="1.0.0".     
+    version="1.0.0"
 )  
 
 # CORS Configuration
@@ -132,6 +133,31 @@ async def analyze_typing_data(file: UploadFile = File(...)):
         # Compute core stats using the core_stats module
         core = core_stats.compute_core_stats(df)
         print(f"✓ Computed core stats")
+        
+        # Compute personas using the clustering module
+        personas = clustering.compute_personas(df)
+        print(f"✓ Computed personas via ML clustering")
+        
+        # Update response data to include core stats and personas
+        response_data = {
+            "status": "success",
+            **core,  # Spreads hook, yearInNumbers, etc.
+            "persona": personas,
+            "message": "Analysis complete!",
+            "rowCount": len(df),
+            "columns": list(df.columns),
+            "dateRange": {
+                "start": str(df['datetime'].min()),
+                "end": str(df['datetime'].max())
+            },
+            "preview": preview_df.to_dict(orient="records") if len(preview_df) > 0 else [],
+            "stats": {
+                "avgWpm": float(df['wpm'].mean()),
+                "maxWpm": float(df['wpm'].max()),
+                "avgAccuracy": float(df['acc'].mean()),
+                "totalChars": int(df['total_chars'].sum())
+            }
+        }
         
         print("✓ Processing complete!")
         return JSONResponse(content=response_data)

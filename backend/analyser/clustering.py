@@ -1,9 +1,10 @@
 import pandas as pd 
 import numpy as np
 from sklearn.cluster import KMeans 
-from sklearn.preprocessing import StandardScaler # Makes features comparable 
+from sklearn.preprocessing import StandardScaler # Makes features comparable
+from sklearn.metrics import silhouette_score  # For evaluating clustering quality 
 
-def find_optimimal_k(features_scaled, k_range=(2,6)): 
+def find_optimal_k(features_scaled, k_range=(2,6)): 
     """
     Find optimal number of clusters using Silhouette Score.
     
@@ -52,12 +53,12 @@ def name_personas(avg_wpm, avg_acc, avg_consistency):
     - Warm Up: Lower stats (still getting started)
     """
     # Define thresholds (you can adjust these based on your data)
-    high_wpm = avg_wpm > 105
-    high_acc = avg_acc > 94
-    high_consistency = avg_consistency > 85
+    high_wpm = avg_wpm > 95
+    high_acc = avg_acc > 90
+    high_consistency = avg_consistency > 83
     
-    low_wpm = avg_wpm < 95
-    low_acc = avg_acc < 92
+    low_wpm = avg_wpm < 85
+    low_acc = avg_acc < 85
     
     # Pattern matching
     if high_wpm and high_acc and high_consistency:
@@ -93,7 +94,7 @@ def name_personas(avg_wpm, avg_acc, avg_consistency):
 
 def compute_personas(df: pd.DataFrame) -> dict: 
     """
-    se K-means clustering to identify typing personas.
+    Use K-means clustering to identify typing personas.
     
     How it works:
     1. Extract features: wpm, accuracy, consistency
@@ -187,14 +188,14 @@ def compute_personas(df: pd.DataFrame) -> dict:
     dominant = clusters_sorted[0]
 
     result = {
-        "dominant_persona": { 
+        "dominantPersona": { 
             "name": dominant['name'],
-            'description': dominant['description'],
+            "description": dominant['description'],
             "percentage": dominant['percentage']
         }, 
         "allPersonas": clusters_sorted
     }
-    print(f'Dominant persona: {dominant['name']} ({dominant['percentage']}%)')
+    print(f"Dominant persona: {dominant['name']} ({dominant['percentage']}%)")
     return result 
 
 
