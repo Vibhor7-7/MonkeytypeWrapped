@@ -25,7 +25,7 @@ Your year in typing, beautifully visualized. Upload your MonkeyType data and get
 - Pandas & NumPy (data processing)
 - Scikit-learn (clustering/ML)
 
-## 📊 Stats We Calculate
+## 📊 Stats Calculated using Numpy/Pandas
 
 | Category | Examples |
 |----------|----------|
