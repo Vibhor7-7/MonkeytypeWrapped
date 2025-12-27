@@ -1,6 +1,9 @@
 import pandas as pd 
 import numpy as np 
 
+def calculate_longest_streak(df: pd.DataFrame) -> int:
+    ...
+    
 
 def compute_core_stats(df: pd.DataFrame)-> dict: 
     """
@@ -19,7 +22,8 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     Returns:
         Dictionary with stats for hook, yearInNumbers, peakPerformance, quirks, accuracy
     """
-    # Info for slide 1 
+    # Info for slide 1: THe Hook 
+
     total_words = (df['wpm'] * df['testDuration']/ 60).sum()
 
     total_time_min = df['testDuration'].sum()/60
@@ -41,6 +45,21 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     }
     print(f"Hook: {int(total_words)} words, {round(total_time_hours, 1)} hours")
 
+    #Info for Slide 2: Year in Numbers 
+    total_tests = len(df)
+    
+    # count unique days with activity 
+    unique_dates = df['date'].nunique()
+    date_range_days = (df['date'.max()-df['date'].min()]).days+1
+    active_days_pct = (unique_dates/date_range_days)*100
+
+    #Total chars typed 
+    total_characters = df['total_chars'].sum()
+
+    #Longest streak 
+    longest_streak = calculate_longest_streak(df)
+    
+    
     return {
         "hook": hook_data
     }
