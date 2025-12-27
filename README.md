@@ -39,59 +39,6 @@ Your year in typing, beautifully visualized. Upload your MonkeyType data and get
 | Accuracy | Error type breakdown, clutch factor |
 | Comparison | Estimated global percentile |
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- Python 3.10+
-- A MonkeyType account with exported data
-
-### Export Your MonkeyType Data
-
-1. Go to [monkeytype.com](https://monkeytype.com)
-2. Log in → Settings → Account → Export Data
-3. Download the CSV file
-
-### Run Locally
-
-```bash
-# Clone the repo
-git clone https://github.com/yourusername/monkeytype-wrapped.git
-cd monkeytype-wrapped
-
-# Backend
-cd backend
-python -m venv venv
-source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-pip install -r requirements.txt
-uvicorn main:app --reload
-
-# Frontend (new terminal)
-cd frontend
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) and upload your CSV.
-
-## 📁 Project Structure
-
-```
-monkeytype-wrapped/
-├── frontend/           # Next.js app
-│   ├── app/
-│   ├── components/
-│   │   └── slides/     # 11 wrapped slides
-│   └── lib/
-└── backend/            # Python FastAPI
-    ├── main.py
-    └── analyzer/
-        ├── parser.py       # CSV processing
-        ├── clustering.py   # Scikit-learn personas
-        ├── warmup.py       # Session analysis
-        └── ...
-```
 
 ## 🤖 How the ML Works
 
