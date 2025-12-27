@@ -19,8 +19,8 @@ from analyser import core_stats
 app = FastAPI(
     title="MonkeyType Wrapped API",
     description="Analyze your typing stats and get a Spotify Wrapped-style breakdown",
-    version="1.0.0"
-)
+    version="1.0.0".     
+)  
 
 # CORS Configuration
 # This allows your frontend (running on a different port/domain) to call this API
