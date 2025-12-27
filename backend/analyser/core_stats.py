@@ -88,7 +88,7 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     
     # count unique days with activity 
     unique_dates = df['date'].nunique()
-    date_range_days = (df['date'.max()-df['date'].min()]).days+1
+    date_range_days = (df['date'].max()-df['date'].min()).days+1
     active_days_pct = (unique_dates/date_range_days)*100
 
     #Total chars typed 
@@ -101,11 +101,11 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
         'totalTests': total_tests,
         'activeDays': unique_dates,
         'totalDays':date_range_days,
-        'activeDaysPct':round(active_days_pct),
+        'activeDaysPct':round(active_days_pct, 1),
         'totalCharacters':int(total_characters),
         'longestStreak':longest_streak,
         "dateRange":{
-            "start": str(df['date'.min()]),
+            "start": str(df['date'].min()),
             "end":str(df['date'].max())
         }
     }
@@ -115,7 +115,7 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     # Slide 4: Peak Performance 
 
     all_time_pb = df['wpm'].max()
-    pb_index = df['wpm'].idmax() #index of max WPM
+    pb_index = df['wpm'].idxmax() #index of max WPM
     pb_date = str(df.loc[pb_index, 'datetime'])
 
     #count perfect accuary tests (100%)
@@ -123,8 +123,8 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     perfect_accuracy_pct = (perfect_accuracy_count/len(df))*100
 
     #Count personal bests (new highest WPM at that point in time)
-    # cunmax gives the running max at the point 
-    total_pbs_hit = (df['wpm']==df ['wpm'].cummax).sum()
+    # cummax() gives the running max at the point 
+    total_pbs_hit = (df['wpm']==df['wpm'].cummax()).sum()
 
     # WPM thresholds (e.g., how many tests > 100 WPM, > 120 WPM)
     thresholds = [100, 110, 120, 130, 140]
@@ -166,7 +166,7 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
 
     if 'mode' in df.columns:
         mode_counts = df['mode'].value_counts()
-        favourite_mode = str(mode_counts.index(0))
+        favorite_mode = str(mode_counts.index[0]) if len(mode_counts) > 0 else "unknown"
         favorite_mode_count = int(mode_counts.iloc[0]) if len(mode_counts) > 0 else 0
     else:
         favorite_mode = "unknown"
@@ -244,8 +244,8 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
 
     # Slide 11: Share card 
     share_card = {
-        "year": df['year'].max(),
-        "headline": f"I typed {int(total_words):,} words in {df['year'].max()}!",
+        "year": int(df['year'].max()),
+        "headline": f"I typed {int(total_words):,} words in {int(df['year'].max())}!",
         "topStats": [
             {"label": "Average WPM", "value": f"{df['wpm'].mean():.1f}"},
             {"label": "Peak WPM", "value": f"{all_time_pb:.1f}"},

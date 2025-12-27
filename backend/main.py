@@ -11,7 +11,8 @@ sys.path.append(str(Path(__file__).parent))
 
 # TODO: Uncomment these imports as we implement each module
 from analyser import parser
-# from analyser import core_stats, journey, timing, warmup, comparisons
+from analyser import core_stats
+# from analyser import journey, timing, warmup, comparisons
 # from models.schemas import WrappedData
 
 # Initialize FastAPI app
@@ -127,6 +128,10 @@ async def analyze_typing_data(file: UploadFile = File(...)):
                 "totalChars": int(df['total_chars'].sum())
             }
         }
+        
+        # Compute core stats using the core_stats module
+        core = core_stats.compute_core_stats(df)
+        print(f"✓ Computed core stats")
         
         print("✓ Processing complete!")
         return JSONResponse(content=response_data)
