@@ -5,7 +5,7 @@ import numpy as np
 def compute_journey(df: pd.DataFrame) -> dict:
     """Analyze typing progress over time."""
     
-    print("\n🚀 Analyzing your typing journey...")
+    print("\n Analyzing your typing journey...")
     
     # Group by month
     monthly_stats = df.groupby('month').agg({

@@ -13,7 +13,8 @@ sys.path.append(str(Path(__file__).parent))
 from analyser import parser
 from analyser import core_stats
 from analyser import clustering
-# from analyser import journey, timing, warmup, comparisons
+from analyser import journey
+from analyser import timing
 # from models.schemas import WrappedData
 
 # Initialize FastAPI app
@@ -138,11 +139,21 @@ async def analyze_typing_data(file: UploadFile = File(...)):
         personas = clustering.compute_personas(df)
         print(f"✓ Computed personas via ML clustering")
         
+        # Compute journey stats (progress over time)
+        journey_data = journey.compute_journey(df)
+        print(f"✓ Computed journey/progress stats")
+        
+        # Compute timing analysis (when user types best)
+        timing_data = timing.compute_timing(df)
+        print(f"✓ Computed timing/schedule analysis")
+        
         # Update response data to include core stats and personas
         response_data = {
             "status": "success",
             **core,  # Spreads hook, yearInNumbers, etc.
             "persona": personas,
+            "journey": journey_data,
+            "timing": timing_data,  # ← Add this
             "message": "Analysis complete!",
             "rowCount": len(df),
             "columns": list(df.columns),
