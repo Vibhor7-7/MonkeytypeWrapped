@@ -44,7 +44,7 @@ Your year in typing, beautifully visualized. Upload your MonkeyType data and get
 
 We use **K-means clustering** on three features (WPM, accuracy, consistency) to identify your typing "personas":
 
-![K-means Clustering Visualization](assets/Screenshot%202025-12-27%20at%203.33.33%20PM.png)
+![K-means Clustering Visualization](assets/clustering-visualization.png)
 
 The algorithm finds natural groupings in *your* data, so the personas are personalized to your typing patterns.
 
