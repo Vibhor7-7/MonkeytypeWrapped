@@ -44,10 +44,8 @@ Your year in typing, beautifully visualized. Upload your MonkeyType data and get
 
 We use **K-means clustering** on three features (WPM, accuracy, consistency) to identify your typing "personas":
 
-- **Flow State** — fast + accurate + consistent
-- **Burst Typer** — fast but variable consistency  
-- **Steady Eddie** — moderate speed, high consistency
-- **Off Day** — slower, lower accuracy
+[Alt text](<img width="976" height="772" alt="Screenshot 2025-12-27 at 3 33 33 PM" src="https://github.com/user-attachments/assets/e65faea4-8509-413a-9dc7-028ec56c5dee" />
+)
 
 The algorithm finds natural groupings in *your* data, so the personas are personalized to your typing patterns.
 
