@@ -2,8 +2,46 @@ import pandas as pd
 import numpy as np 
 
 def calculate_longest_streak(df: pd.DataFrame) -> int:
-    ...
+    """
+    Calculate the longest consecutive streak of active days. 
     
+    How it works: 
+    1. Get unique sorted dates 
+    2. Find gaps > 1 day (the streak breaks)
+    3. Return longest streak length
+
+     Args:
+        df: DataFrame with 'date' column
+        
+    Returns:
+        Longest streak in days
+    """
+
+    # Get unique dates and sort them
+    unique_dates = sorted(df['date'].unique())
+    
+    if len(unique_dates) == 0:
+        return 0
+
+    # Convert to pandas series 
+    date_series = pd.Series(unique_dates)
+
+    # Calculate difference between consecutive dates (in days)
+    # diff() gives us the gap: [day1, day2, day3] -> [NaN, 1, 1] for consecutive days
+    date_diffs = date_series.diff().dt.days
+
+    # Find where streaks break (gap > 1 day)
+    # Create a "streak_id" that increments at each break
+    streak_breaks = (date_diffs>1).cumsum()
+
+    # Group by streak_id and count days in each streak
+    streak_lengths = date_series.groupby(streak_breaks).size()
+
+    # Return the longest streak
+    longest = int(streak_lengths.max())
+    
+    return longest 
+
 
 def compute_core_stats(df: pd.DataFrame)-> dict: 
     """
@@ -59,8 +97,23 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     #Longest streak 
     longest_streak = calculate_longest_streak(df)
     
+    year_in_numbers = { 
+        'totalTests': total_tests,
+        'activeDays': unique_dates,
+        'totalDays':date_range_days,
+        'activeDaysPct':round(active_days_pct),
+        'totalCharacters':int(total_characters),
+        'longestStreak':longest_streak,
+        "dateRange":{
+            "start": str(df['date'.min()]),
+            "end":str(df['date'].max())
+        }
+    }
+    
+    print(f"Year in Numbers: {total_tests} tests, {unique_dates} active days")
     
     return {
-        "hook": hook_data
+        "hook": hook_data,
+        "yearInNumbers": year_in_numbers
     }
     ...
