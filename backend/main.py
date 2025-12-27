@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent))
 
 # TODO: Uncomment these imports as we implement each module
-# from analyser import parser
+from analyser import parser
 # from analyser import core_stats, journey, timing, warmup, comparisons
 # from models.schemas import WrappedData
 
@@ -82,7 +82,7 @@ async def analyze_typing_data(file: UploadFile = File(...)):
         
         # Step 3: Parse CSV using pandas directly (temporary - will move to parser.py)
         # This converts the raw CSV into a pandas DataFrame
-        df = pd.read_csv(BytesIO(contents))
+        df = parser.parse_csv(contents)
         
         # Step 4: Validate we have data
         if df.empty:
@@ -94,14 +94,38 @@ async def analyze_typing_data(file: UploadFile = File(...)):
         print(f"✓ Received CSV with {len(df)} rows")
         print(f"✓ Columns: {list(df.columns)}")
         
-        # Step 5: Return basic info for now (placeholder response)
+        # Step 5: Prepare sample data for preview (convert to JSON-compatible format)
+        preview_df = df.head(3).copy()
+        
+        # Convert datetime objects to strings
+        if 'datetime' in preview_df.columns:
+            preview_df['datetime'] = preview_df['datetime'].astype(str)
+        if 'date' in preview_df.columns:
+            preview_df['date'] = preview_df['date'].astype(str)
+        if 'month' in preview_df.columns:
+            preview_df['month'] = preview_df['month'].astype(str)
+        
+        # Replace NaN/infinity with None (JSON null)
+        preview_df = preview_df.replace({float('nan'): None, float('inf'): None, float('-inf'): None})
+        
+        # Step 6: Return basic info for now (placeholder response)
         # TODO: Replace this with actual analysis once modules are implemented
         response_data = {
             "status": "success",
             "message": "CSV uploaded successfully! Analysis modules coming soon.",
             "rowCount": len(df),
             "columns": list(df.columns),
-            "preview": df.head(3).to_dict(orient="records") if len(df) > 0 else []
+            "dateRange": {
+                "start": str(df['datetime'].min()),
+                "end": str(df['datetime'].max())
+            },
+            "preview": preview_df.to_dict(orient="records") if len(preview_df) > 0 else [],
+            "stats": {
+                "avgWpm": float(df['wpm'].mean()),
+                "maxWpm": float(df['wpm'].max()),
+                "avgAccuracy": float(df['acc'].mean()),
+                "totalChars": int(df['total_chars'].sum())
+            }
         }
         
         print("✓ Processing complete!")
