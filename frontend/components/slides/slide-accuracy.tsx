@@ -24,6 +24,46 @@ export function SlideAccuracy() {
       ref={ref}
       className="relative min-h-screen w-full flex items-center justify-center py-20 overflow-hidden snap-start"
     >
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(50)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{
+              y: [0, -50 - Math.random() * 100, 0],
+              x: [0, (Math.random() - 0.5) * 100, 0],
+              opacity: [0, 0.3, 0],
+              scale: [0, 1 + Math.random(), 0],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Number.POSITIVE_INFINITY,
+              delay: Math.random() * 3,
+              ease: "easeInOut",
+            }}
+          >
+            <div className="w-2 h-2 rounded-full bg-primary" />
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        animate={{
+          background: [
+            "radial-gradient(circle at 50% 50%, rgba(212, 168, 85, 0.05) 0%, transparent 50%)",
+            "radial-gradient(circle at 50% 50%, rgba(212, 168, 85, 0.1) 0%, transparent 60%)",
+            "radial-gradient(circle at 50% 50%, rgba(212, 168, 85, 0.05) 0%, transparent 50%)",
+          ],
+        }}
+        transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+      />
+
       <div className="relative z-10 w-full max-w-6xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

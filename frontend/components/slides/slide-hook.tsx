@@ -194,12 +194,22 @@ export function SlideHook() {
             transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
             className="flex flex-col items-center gap-2 text-muted-foreground"
           >
-            <span className="text-xs uppercase tracking-widest">Scroll to explore</span>
-            <div className="w-6 h-10 border-2 border-muted-foreground/50 rounded-full flex justify-center pt-2 relative overflow-hidden">
+            <span className="text-xs uppercase tracking-widest">Use buttons to explore</span>
+            <div className="flex gap-2 mt-2">
               <motion.div
-                animate={{ y: [0, 12, 0], opacity: [1, 0.3, 1] }}
+                animate={{ x: [-2, 2, -2] }}
                 transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
-                className="w-1.5 h-3 bg-primary rounded-full"
+                className="w-2 h-2 bg-primary rounded-full"
+              />
+              <motion.div
+                animate={{ x: [-2, 2, -2] }}
+                transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, delay: 0.3 }}
+                className="w-2 h-2 bg-primary rounded-full"
+              />
+              <motion.div
+                animate={{ x: [-2, 2, -2] }}
+                transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, delay: 0.6 }}
+                className="w-2 h-2 bg-primary rounded-full"
               />
             </div>
           </motion.div>

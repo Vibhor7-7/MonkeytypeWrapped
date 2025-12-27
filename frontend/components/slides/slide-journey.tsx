@@ -21,28 +21,45 @@ export function SlideJourney() {
 
   return (
     <section ref={ref} className="relative h-full w-full flex items-center justify-center py-20 overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(6)].map((_, i) => (
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(50)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-primary/30 rounded-full"
+            className="absolute"
             style={{
-              left: `${15 + i * 15}%`,
-              top: `${20 + (i % 3) * 25}%`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
             }}
+            initial={{ opacity: 0, scale: 0 }}
             animate={{
-              y: [0, -30, 0],
-              scale: [1, 1.5, 1],
-              opacity: [0.3, 0.7, 0.3],
+              y: [0, -50 - Math.random() * 100, 0],
+              x: [0, (Math.random() - 0.5) * 100, 0],
+              opacity: [0, 0.3, 0],
+              scale: [0, 1 + Math.random(), 0],
             }}
             transition={{
-              duration: 3 + i * 0.5,
+              duration: 3 + Math.random() * 2,
               repeat: Number.POSITIVE_INFINITY,
-              delay: i * 0.3,
+              delay: Math.random() * 3,
+              ease: "easeInOut",
             }}
-          />
+          >
+            <div className="w-2 h-2 rounded-full bg-primary" />
+          </motion.div>
         ))}
       </div>
+
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        animate={{
+          background: [
+            "radial-gradient(circle at 50% 50%, rgba(212, 168, 85, 0.05) 0%, transparent 50%)",
+            "radial-gradient(circle at 50% 50%, rgba(212, 168, 85, 0.1) 0%, transparent 60%)",
+            "radial-gradient(circle at 50% 50%, rgba(212, 168, 85, 0.05) 0%, transparent 50%)",
+          ],
+        }}
+        transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+      />
 
       <div className="relative z-10 w-full max-w-6xl px-6">
         <motion.div
