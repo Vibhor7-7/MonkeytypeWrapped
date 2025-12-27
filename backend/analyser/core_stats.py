@@ -155,12 +155,98 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     avg_restarts = df['restartCount'].mean()
     max_restarts = int(df['restartCount'].max())
 
-
-
+    #Percentage of tests on first try (no restarts)
+    first_try_count = len(df[df['restartCount']==0])
+    first_try_pct = (first_try_count/len(df))*100
     
+    # TIme wasted on restarted tests (rough estimate)
+    # Assume each restart wastes 3 seconds on avg 
+    time_wasted_seconds = df['restartCount'].sum() * 3
+    time_wasted_minutes = time_wasted_seconds / 60
+
+    if 'mode' in df.columns:
+        mode_counts = df['mode'].value_counts()
+        favourite_mode = str(mode_counts.index(0))
+        favorite_mode_count = int(mode_counts.iloc[0]) if len(mode_counts) > 0 else 0
+    else:
+        favorite_mode = "unknown"
+        favorite_mode_count = 0
+    
+    # Classify restart addiction level
+    if avg_restarts < 0.5:
+        restart_level = "casual"
+    elif avg_restarts < 1.5:
+        restart_level = "moderate"
+    elif avg_restarts < 3:
+        restart_level = "perfectionist"
+    else:
+        restart_level = "extreme"
+    quirks = {
+        "avgRestarts": round(avg_restarts, 2),
+        "maxRestarts": max_restarts,
+        "firstTryPct": round(first_try_pct, 1),
+        "timeWastedMinutes": round(time_wasted_minutes, 1),
+        "favoriteMode": favorite_mode,
+        "favoriteModeCount": favorite_mode_count,
+        "restartAddictionLevel": restart_level
+    }
+    print(f" Quirks: {round(avg_restarts, 2)} avg restarts, {restart_level} level")
+
+    # Slide 9: Accuracy Deep Dive 
+    overall_accuracy = df['acc'].mean()
+
+    #Total errors by type 
+    total_wrong_key = df ['chars_incorrect'].sum()
+    total_extra = df['chars_extra'].sum()
+    total_missed = df['chars_missed'].sum()
+    total_errors = total_wrong_key + total_extra + total_missed
+
+    # Error breakdown percentages
+    error_breakdown = {
+        "wrongKey": {
+            "count": int(total_wrong_key),
+            "pct": round((total_wrong_key / total_errors * 100) if total_errors > 0 else 0, 1)
+        },
+        "extraChars": {
+            "count": int(total_extra),
+            "pct": round((total_extra / total_errors * 100) if total_errors > 0 else 0, 1)
+        },
+        "missedChars": {
+            "count": int(total_missed),
+            "pct": round((total_missed / total_errors * 100) if total_errors > 0 else 0, 1)
+        }
+    }
+
+    #Clutch Factor: accuracy when typing fast vs slow (top 10% of tests)
+    fast_threshold = df['wpm'].quantile(0.9)
+    fast_tests = df[df['wpm'] >= fast_threshold]
+    fast_accuracy = fast_tests['acc'].mean() if len(fast_tests) > 0 else 0
+
+    # Bottom 10% slowest tests
+    slow_threshold = df['wpm'].quantile(0.10)
+    slow_tests = df[df['wpm'] <= slow_threshold]
+    slow_accuracy = slow_tests['acc'].mean() if len(slow_tests) > 0 else 0
+    
+    clutch_difference = fast_accuracy - slow_accuracy
+
+    accuracy_data = {
+        'overallAccuracy': round(overall_accuracy,2),
+        "totalErrors": int(total_errors),
+        "errorBreakdown": error_breakdown,
+        "clutchFactor": {
+            "fastTestsAccuracy": round(fast_accuracy, 2), 
+            "slowTestsAccuracy": round(slow_accuracy, 2),
+            "difference": round(clutch_difference, 2)
+        } 
+    }
+
+    print(f"Accuracy: {round(overall_accuracy, 2)}% overall, {int(total_errors)} total errors ")
     return {
         "hook": hook_data,
         "yearInNumbers": year_in_numbers,
-        "peakPerformance": peak_performance
+        "peakPerformance": peak_performance,
+        "quirks": quirks
     }
+
+
     ...
