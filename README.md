@@ -46,7 +46,7 @@ We use **K-means clustering** on three features (WPM, accuracy, consistency) to 
 
 ![K-means Clustering Visualization](assets/clustering-visualization.png)
 
-The algorithm finds natural groupings in *your* data, so the personas are personalized to your typing patterns.
+The algorithm finds natural groupings in *your* data, so the personas are personalized to your typing patterns. (Unspervised Learning)
 
 ## 📝 License
 
