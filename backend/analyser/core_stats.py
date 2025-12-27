@@ -60,7 +60,7 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     Returns:
         Dictionary with stats for hook, yearInNumbers, peakPerformance, quirks, accuracy
     """
-    # Info for slide 1: THe Hook 
+    # Slide 1: THe Hook 
 
     total_words = (df['wpm'] * df['testDuration']/ 60).sum()
 
@@ -83,7 +83,7 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     }
     print(f"Hook: {int(total_words)} words, {round(total_time_hours, 1)} hours")
 
-    #Info for Slide 2: Year in Numbers 
+    # Slide 2: Year in Numbers 
     total_tests = len(df)
     
     # count unique days with activity 
@@ -112,8 +112,55 @@ def compute_core_stats(df: pd.DataFrame)-> dict:
     
     print(f"Year in Numbers: {total_tests} tests, {unique_dates} active days")
     
+    # Slide 4: Peak Performance 
+
+    all_time_pb = df['wpm'].max()
+    pb_index = df['wpm'].idmax() #index of max WPM
+    pb_date = str(df.loc[pb_index, 'datetime'])
+
+    #count perfect accuary tests (100%)
+    perfect_accuracy_count = len(df[df['acc']==100])
+    perfect_accuracy_pct = (perfect_accuracy_count/len(df))*100
+
+    #Count personal bests (new highest WPM at that point in time)
+    # cunmax gives the running max at the point 
+    total_pbs_hit = (df['wpm']==df ['wpm'].cummax).sum()
+
+    # WPM thresholds (e.g., how many tests > 100 WPM, > 120 WPM)
+    thresholds = [100, 110, 120, 130, 140]
+    threshold_data = []
+
+    for threshold in thresholds:
+        count = len(df[df['wpm'] >= threshold])
+        pct = (count / len(df)) * 100 if len(df) > 0 else 0
+        threshold_data.append({
+            "wpm": threshold,
+            "count": count,
+            "pct": round(pct, 1)
+        })
+
+    peak_performance = { 
+        "allTimePb": round(all_time_pb, 2),
+        "pbDate": pb_date,
+        "totalPbsHit": int(total_pbs_hit),
+        "perfectAccuracyCount": perfect_accuracy_count,
+        "perfectAccuracyPct": round(perfect_accuracy_pct, 1),
+        "thresholds": threshold_data
+    }
+
+    print(f"Peak Performance: {round(all_time_pb, 2)} WPM PB, {total_pbs_hit} PBs hit")
+    
+    #Slide 8: Your Quirks 
+
+    avg_restarts = df['restartCount'].mean()
+    max_restarts = int(df['restartCount'].max())
+
+
+
+    
     return {
         "hook": hook_data,
-        "yearInNumbers": year_in_numbers
+        "yearInNumbers": year_in_numbers,
+        "peakPerformance": peak_performance
     }
     ...
