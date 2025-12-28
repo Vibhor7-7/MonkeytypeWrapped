@@ -26,8 +26,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",      # Local development
         "http://127.0.0.1:3000",      # Alternative localhost
-        # Add your production frontend URL here later
-        # "https://your-app.vercel.app"
+        "https://*.vercel.app",       # Vercel preview and production deployments
     ],
     allow_credentials=True,
     allow_methods=["*"],              # Allow all HTTP methods (GET, POST, etc.)
