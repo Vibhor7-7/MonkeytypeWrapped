@@ -240,25 +240,6 @@ export function UploadFlow({ onFileUpload }: UploadFlowProps) {
               />
             )}
           </motion.div>
-
-          {/* Demo button */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="text-center mt-8"
-          >
-            <p className="text-muted-foreground mb-4">Don't have a CSV? Try our demo</p>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-primary/30 hover:bg-primary/10 hover:border-primary bg-transparent"
-              onClick={handleFileSelect}
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              Generate Demo Wrapped
-            </Button>
-          </motion.div>
         </motion.div>
       </div>
     </section>
