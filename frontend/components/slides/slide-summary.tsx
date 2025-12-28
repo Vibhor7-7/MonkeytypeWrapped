@@ -5,6 +5,8 @@ import { useRef, useState } from "react"
 import { Keyboard, Share2, Download, Sparkles, Trophy, Star, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { type WrappedData } from "@/lib/api"
+import { toPng } from 'html-to-image'
+import { toast } from "sonner"
 
 interface SlideSummaryProps {
   data: WrappedData
@@ -15,6 +17,73 @@ export function SlideSummary({ data }: SlideSummaryProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(cardRef, { once: true, amount: 0.3 })
   const [isHovered, setIsHovered] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+
+  const handleDownload = async () => {
+    if (!cardRef.current) return
+    
+    setIsExporting(true)
+    try {
+      const dataUrl = await toPng(cardRef.current, {
+        quality: 1,
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: '#0a0908',
+      })
+      
+      const link = document.createElement('a')
+      link.download = 'monkeytype-wrapped-2025.png'
+      link.href = dataUrl
+      link.click()
+      
+      toast.success('Card downloaded successfully!')
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error('Failed to download card')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleShare = async () => {
+    if (!cardRef.current) return
+    
+    setIsExporting(true)
+    try {
+      const dataUrl = await toPng(cardRef.current, {
+        quality: 1,
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: '#0a0908',
+      })
+      
+      // Convert data URL to blob
+      const response = await fetch(dataUrl)
+      const blob = await response.blob()
+      const file = new File([blob], 'monkeytype-wrapped-2025.png', { type: 'image/png' })
+      
+      // Check if Web Share API is supported
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'My Monkeytype Wrapped 2025',
+          text: `I'm in the top ${(100 - data.comparisons.globalPercentile).toFixed(0)}% of typists! Check out my typing stats 🚀`,
+        })
+        toast.success('Shared successfully!')
+      } else {
+        // Fallback: copy link or download
+        await handleDownload()
+        toast.info('Share not supported. Card downloaded instead!')
+      }
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        console.error('Share error:', error)
+        toast.error('Failed to share card')
+      }
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   return (
     <section ref={ref} className="relative min-h-screen w-full flex items-center justify-center py-20 overflow-hidden">
@@ -275,7 +344,9 @@ export function SlideSummary({ data }: SlideSummaryProps) {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-8 relative overflow-hidden group"
+              onClick={handleShare}
+              disabled={isExporting}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-8 relative overflow-hidden group disabled:opacity-50"
             >
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -283,14 +354,18 @@ export function SlideSummary({ data }: SlideSummaryProps) {
                 transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, repeatDelay: 1 }}
               />
               <Share2 className="w-4 h-4 relative z-10" />
-              <span className="relative z-10">Share Your Wrapped</span>
+              <span className="relative z-10">
+                {isExporting ? 'Processing...' : 'Share Your Wrapped'}
+              </span>
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="outline"
               size="lg"
-              className="border-primary/30 hover:bg-primary/10 gap-2 px-8 bg-transparent"
+              onClick={handleDownload}
+              disabled={isExporting}
+              className="border-primary/30 hover:bg-primary/10 gap-2 px-8 bg-transparent disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
               Download Card
