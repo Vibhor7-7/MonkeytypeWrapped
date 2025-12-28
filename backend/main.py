@@ -9,12 +9,7 @@ from pathlib import Path
 # Add the backend directory to the Python path
 sys.path.append(str(Path(__file__).parent))
 
-# TODO: Uncomment these imports as we implement each module
-from analyser import parser
-from analyser import core_stats
-from analyser import clustering
-from analyser import journey
-from analyser import timing
+from analyser import parser, core_stats, clustering, journey, timing, warmup, comparisons
 # from models.schemas import WrappedData
 
 # Initialize FastAPI app
@@ -94,8 +89,8 @@ async def analyze_typing_data(file: UploadFile = File(...)):
                 detail="CSV file is empty or invalid."
             )
         
-        print(f"✓ Received CSV with {len(df)} rows")
-        print(f"✓ Columns: {list(df.columns)}")
+        print(f"Received CSV with {len(df)} rows")
+        print(f"Columns: {list(df.columns)}")
         
         # Step 5: Prepare sample data for preview (convert to JSON-compatible format)
         preview_df = df.head(3).copy()
@@ -133,19 +128,27 @@ async def analyze_typing_data(file: UploadFile = File(...)):
         
         # Compute core stats using the core_stats module
         core = core_stats.compute_core_stats(df)
-        print(f"✓ Computed core stats")
+        print(f" Computed core stats")
         
         # Compute personas using the clustering module
         personas = clustering.compute_personas(df)
-        print(f"✓ Computed personas via ML clustering")
+        print(f" Computed personas via ML clustering")
         
         # Compute journey stats (progress over time)
         journey_data = journey.compute_journey(df)
-        print(f"✓ Computed journey/progress stats")
+        print(f" Computed journey/progress stats")
         
         # Compute timing analysis (when user types best)
         timing_data = timing.compute_timing(df)
-        print(f"✓ Computed timing/schedule analysis")
+        print(f" Computed timing/schedule analysis")
+
+        # Compute warmup analysis (performance changes within sessions)
+        warmup_data = warmup.compute_warmup(df)
+        print(f" Computed warmup analysis")
+        
+        # Compute global comparisons (how you rank)
+        comparison_data = comparisons.compute_comparisons(df)
+        print(f" Computed global comparisons")
         
         # Update response data to include core stats and personas
         response_data = {
@@ -153,7 +156,9 @@ async def analyze_typing_data(file: UploadFile = File(...)):
             **core,  # Spreads hook, yearInNumbers, etc.
             "persona": personas,
             "journey": journey_data,
-            "timing": timing_data,  # ← Add this
+            "timing": timing_data, 
+            "warmup": warmup_data,
+            "comparisons": comparison_data,
             "message": "Analysis complete!",
             "rowCount": len(df),
             "columns": list(df.columns),
@@ -170,7 +175,7 @@ async def analyze_typing_data(file: UploadFile = File(...)):
             }
         }
         
-        print("✓ Processing complete!")
+        print("Processing complete!")
         return JSONResponse(content=response_data)
         
     except pd.errors.EmptyDataError:
@@ -180,7 +185,7 @@ async def analyze_typing_data(file: UploadFile = File(...)):
         )
     except Exception as e:
         # Log the error for debugging
-        print(f"✗ Error during analysis: {str(e)}")
+        print(f" Error during analysis: {str(e)}")
         import traceback
         traceback.print_exc()
         
