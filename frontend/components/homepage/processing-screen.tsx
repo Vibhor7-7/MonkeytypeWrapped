@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
+import { analyzeTypingData, type WrappedData } from "@/lib/api"
 
 const processingMessages = [
   "Crunching your keystrokes...",
@@ -13,20 +14,26 @@ const processingMessages = [
 ]
 
 interface ProcessingScreenProps {
-  onComplete: () => void
+  file: File | null
+  onComplete: (data: WrappedData) => void
+  onError: (error: string) => void
 }
 
-export function ProcessingScreen({ onComplete }: ProcessingScreenProps) {
+export function ProcessingScreen({ file, onComplete, onError }: ProcessingScreenProps) {
   const [messageIndex, setMessageIndex] = useState(0)
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
+    if (!file) {
+      onError("No file provided")
+      return
+    }
+
     // Progress animation
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(progressInterval)
-          return 100
+        if (prev >= 95) {
+          return 95 // Stop at 95% until API responds
         }
         return prev + 2
       })
@@ -37,17 +44,26 @@ export function ProcessingScreen({ onComplete }: ProcessingScreenProps) {
       setMessageIndex((prev) => (prev + 1) % processingMessages.length)
     }, 700)
 
-    // Complete after processing
-    const completeTimeout = setTimeout(() => {
-      onComplete()
-    }, 4500)
+    // Call the actual API
+    analyzeTypingData(file)
+      .then((data) => {
+        setProgress(100)
+        setTimeout(() => onComplete(data), 500)
+      })
+      .catch((error) => {
+        console.error("Analysis error:", error)
+        onError(error.message || "Failed to analyze data. Please try again.")
+      })
+      .finally(() => {
+        clearInterval(progressInterval)
+        clearInterval(messageInterval)
+      })
 
     return () => {
       clearInterval(progressInterval)
       clearInterval(messageInterval)
-      clearTimeout(completeTimeout)
     }
-  }, [onComplete])
+  }, [file, onComplete, onError])
 
   return (
     <motion.div

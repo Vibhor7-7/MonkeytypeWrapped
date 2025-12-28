@@ -8,7 +8,7 @@ import { Upload, FileText, CheckCircle, ExternalLink, Copy, ArrowRight } from "l
 import { Button } from "@/components/ui/button"
 
 interface UploadFlowProps {
-  onFileUpload: () => void
+  onFileUpload: (file: File) => void
 }
 
 const steps = [
@@ -37,6 +37,7 @@ export function UploadFlow({ onFileUpload }: UploadFlowProps) {
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [isDragging, setIsDragging] = useState(false)
   const [fileUploaded, setFileUploaded] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -48,20 +49,50 @@ export function UploadFlow({ onFileUpload }: UploadFlowProps) {
     setIsDragging(false)
   }, [])
 
+  const processFile = useCallback(
+    (file: File) => {
+      if (!file.name.endsWith('.csv')) {
+        alert('Please upload a CSV file')
+        return
+      }
+      
+      setFileUploaded(true)
+      setTimeout(() => onFileUpload(file), 800)
+    },
+    [onFileUpload]
+  )
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
       setIsDragging(false)
-      setFileUploaded(true)
-      setTimeout(onFileUpload, 1000)
+      
+      const file = e.dataTransfer.files[0]
+      if (file) {
+        processFile(file)
+      }
     },
-    [onFileUpload],
+    [processFile],
   )
 
   const handleFileSelect = useCallback(() => {
-    setFileUploaded(true)
-    setTimeout(onFileUpload, 1000)
-  }, [onFileUpload])
+    console.log('Dropbox clicked, triggering file input...')
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    } else {
+      console.error('File input ref not found')
+    }
+  }, [])
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (file) {
+        processFile(file)
+      }
+    },
+    [processFile]
+  )
 
   return (
     <section ref={ref} className="relative min-h-screen w-full py-24 px-6 bg-background">
@@ -144,8 +175,17 @@ export function UploadFlow({ onFileUpload }: UploadFlowProps) {
               hover:border-primary/50 hover:bg-card
               ${isDragging ? "glow-gold" : ""}
             `}
-            onClick={handleFileSelect}
           >
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleFileInputChange}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              title="Click to upload CSV"
+            />
+            
             {/* Upload icon */}
             <motion.div
               animate={{

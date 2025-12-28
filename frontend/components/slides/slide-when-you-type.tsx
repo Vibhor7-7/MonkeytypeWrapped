@@ -1,17 +1,21 @@
 "use client"
 
 import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
-import { userData } from "@/lib/mock-data"
+import { useRef, useMemo } from "react"
 import { Sun, Moon, Clock, Star } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
-export function SlideWhenYouType() {
+interface SlideWhenYouTypeProps {
+  data: WrappedData
+}
+
+export function SlideWhenYouType({ data }: SlideWhenYouTypeProps) {
   const ref = useRef<HTMLDivElement>(null)
   const heatmapRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(heatmapRef, { once: true })
 
-  const maxWpm = Math.max(...userData.hourlyData.map((h) => h.wpm))
-  const minWpm = Math.min(...userData.hourlyData.map((h) => h.wpm))
+  const maxWpm = Math.max(...data.timing.hourlyBreakdown.map((h) => h.avgWpm))
+  const minWpm = Math.min(...data.timing.hourlyBreakdown.map((h) => h.avgWpm))
 
   const getIntensity = (wpm: number) => {
     const normalized = (wpm - minWpm) / (maxWpm - minWpm)
@@ -24,31 +28,46 @@ export function SlideWhenYouType() {
     return hour > 12 ? `${hour - 12}PM` : `${hour}AM`
   }
 
+  // Generate random values once on client side to avoid hydration mismatch
+  const floatingDots = useMemo(() => 
+    Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      yOffset: -50 - Math.random() * 100,
+      xOffset: (Math.random() - 0.5) * 100,
+      scaleMax: 1 + Math.random(),
+      duration: 3 + Math.random() * 2,
+      delay: Math.random() * 3,
+    })),
+    []
+  )
+
   return (
     <section
       ref={ref}
       className="relative min-h-screen w-full flex items-center justify-center py-20 overflow-hidden snap-start"
     >
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(50)].map((_, i) => (
+        {floatingDots.map((dot) => (
           <motion.div
-            key={i}
+            key={dot.id}
             className="absolute"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${dot.left}%`,
+              top: `${dot.top}%`,
             }}
             initial={{ opacity: 0, scale: 0 }}
             animate={{
-              y: [0, -50 - Math.random() * 100, 0],
-              x: [0, (Math.random() - 0.5) * 100, 0],
+              y: [0, dot.yOffset, 0],
+              x: [0, dot.xOffset, 0],
               opacity: [0, 0.3, 0],
-              scale: [0, 1 + Math.random(), 0],
+              scale: [0, dot.scaleMax, 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: dot.duration,
               repeat: Number.POSITIVE_INFINITY,
-              delay: Math.random() * 3,
+              delay: dot.delay,
               ease: "easeInOut",
             }}
           >
@@ -98,11 +117,11 @@ export function SlideWhenYouType() {
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">Peak Hour</div>
-                <div className="text-2xl font-bold text-primary">{formatHour(userData.bestHour)}</div>
+                <div className="text-2xl font-bold text-primary">{formatHour(data.timing.bestHour)}</div>
               </div>
             </div>
             <div className="text-4xl font-bold text-gold-gradient">
-              {userData.hourlyData[userData.bestHour].wpm} WPM
+              {data.timing.hourlyBreakdown[data.timing.bestHour].avgWpm} WPM
             </div>
           </motion.div>
 
@@ -119,10 +138,10 @@ export function SlideWhenYouType() {
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">Slowest Hour</div>
-                <div className="text-2xl font-bold text-foreground">{formatHour(userData.worstHour)}</div>
+                <div className="text-2xl font-bold text-foreground">{formatHour(data.timing.worstHour)}</div>
               </div>
             </div>
-            <div className="text-4xl font-bold text-foreground">{userData.hourlyData[userData.worstHour].wpm} WPM</div>
+            <div className="text-4xl font-bold text-foreground">{data.timing.hourlyBreakdown[data.timing.worstHour].avgWpm} WPM</div>
           </motion.div>
         </div>
 
@@ -141,8 +160,8 @@ export function SlideWhenYouType() {
           </h3>
 
           <div className="grid grid-cols-12 gap-1 md:gap-2">
-            {userData.hourlyData.map((hour, index) => {
-              const intensity = getIntensity(hour.wpm)
+            {data.timing.hourlyBreakdown.map((hour, index) => {
+              const intensity = getIntensity(hour.avgWpm)
 
               return (
                 <motion.div
@@ -164,8 +183,8 @@ export function SlideWhenYouType() {
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
                     <div className="bg-card border border-primary/30 rounded-lg px-3 py-2 text-xs whitespace-nowrap">
                       <div className="font-mono text-primary">{formatHour(hour.hour)}</div>
-                      <div className="text-foreground font-bold">{hour.wpm} WPM</div>
-                      <div className="text-muted-foreground">{hour.tests} tests</div>
+                      <div className="text-foreground font-bold">{hour.avgWpm} WPM</div>
+                      <div className="text-muted-foreground">{hour.testCount} tests</div>
                     </div>
                   </div>
                 </motion.div>
@@ -195,14 +214,14 @@ export function SlideWhenYouType() {
             <Moon className="w-8 h-8 text-primary" />
             <div>
               <div className="text-sm text-muted-foreground">You're a</div>
-              <div className="text-2xl font-bold text-gold-gradient">{userData.typingPersona}</div>
+              <div className="text-2xl font-bold text-gold-gradient">{data.timing.timePreference}</div>
             </div>
           </div>
 
           <div className="flex items-center gap-2 text-muted-foreground">
             <Star className="w-4 h-4 text-primary" />
             <span>
-              Best day: <span className="text-primary font-semibold">{userData.bestDayOfWeek}</span>
+              Best day: <span className="text-primary font-semibold">{data.timing.bestDay}</span>
             </span>
           </div>
         </motion.div>

@@ -2,11 +2,15 @@
 
 import { motion, useInView } from "framer-motion"
 import { useRef, useState } from "react"
-import { userData } from "@/lib/mock-data"
 import { Keyboard, Share2, Download, Sparkles, Trophy, Star, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { type WrappedData } from "@/lib/api"
 
-export function SlideSummary() {
+interface SlideSummaryProps {
+  data: WrappedData
+}
+
+export function SlideSummary({ data }: SlideSummaryProps) {
   const ref = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(cardRef, { once: true, amount: 0.3 })
@@ -171,17 +175,17 @@ export function SlideSummary() {
               </div>
               <div className="text-right flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-primary" />
-                <div className="text-xs text-muted-foreground">@{userData.username}</div>
+                <div className="text-xs text-muted-foreground">@{"TypeMaster"}</div>
               </div>
             </div>
 
             {/* Stats Grid - Enhanced with staggered animations */}
             <div className="relative grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
               {[
-                { value: userData.topStats.wpm, label: "Top WPM", icon: Zap },
-                { value: `${userData.topStats.accuracy}%`, label: "Accuracy", icon: Star },
-                { value: userData.topStats.tests.toLocaleString(), label: "Tests", icon: Keyboard },
-                { value: userData.topStats.streak, label: "Day Streak", icon: Trophy },
+                { value: data.comparisons.maxWpm, label: "Top WPM", icon: Zap },
+                { value: `${data.accuracy.overallAccuracy}%`, label: "Accuracy", icon: Star },
+                { value: data.yearInNumbers.totalTests.toLocaleString(), label: "Tests", icon: Keyboard },
+                { value: data.yearInNumbers.longestStreak, label: "Day Streak", icon: Trophy },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -233,7 +237,7 @@ export function SlideSummary() {
                 }}
                 transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
               >
-                {userData.dominantPersona}
+                {data.persona.dominantPersona.name}
               </motion.div>
             </motion.div>
 
@@ -252,7 +256,7 @@ export function SlideSummary() {
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
                 >
-                  {100 - userData.globalPercentile}%
+                  {(100 - data.comparisons.globalPercentile).toFixed(0)}%
                 </motion.span>{" "}
                 of all typists worldwide
               </p>

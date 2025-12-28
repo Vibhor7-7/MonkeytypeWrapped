@@ -2,10 +2,14 @@
 
 import { motion } from "framer-motion"
 import { useRef } from "react"
-import { userData } from "@/lib/mock-data"
 import { Globe, Zap, BookOpen } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
-export function SlideCompare() {
+interface SlideCompareProps {
+  data: WrappedData
+}
+
+export function SlideCompare({ data }: SlideCompareProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   return (
@@ -90,7 +94,7 @@ export function SlideCompare() {
                 viewport={{ once: true }}
                 className="text-8xl md:text-9xl font-bold text-gold-gradient text-glow-gold"
               >
-                {userData.globalPercentile}
+                {data.comparisons.globalPercentile}
               </motion.div>
               <div className="text-2xl text-primary font-mono">percentile</div>
             </div>
@@ -105,21 +109,21 @@ export function SlideCompare() {
               <div className="h-4 bg-muted rounded-full overflow-hidden relative">
                 <motion.div
                   initial={{ width: 0 }}
-                  whileInView={{ width: `${userData.globalPercentile}%` }}
+                  whileInView={{ width: `${data.comparisons.globalPercentile}%` }}
                   transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
                   viewport={{ once: true }}
                   className="h-full bg-gradient-to-r from-primary/60 to-primary rounded-full"
                 />
                 <motion.div
                   initial={{ left: 0, opacity: 0 }}
-                  whileInView={{ left: `${userData.globalPercentile}%`, opacity: 1 }}
+                  whileInView={{ left: `${data.comparisons.globalPercentile}%`, opacity: 1 }}
                   transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
                   viewport={{ once: true }}
                   className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 bg-primary rounded-full border-2 border-background shadow-lg"
                 />
               </div>
               <p className="text-muted-foreground mt-4">
-                You're faster than <span className="text-primary font-semibold">{userData.globalPercentile}%</span> of
+                You're faster than <span className="text-primary font-semibold">{data.comparisons.globalPercentile}%</span> of
                 all typists
               </p>
             </div>
@@ -153,7 +157,7 @@ export function SlideCompare() {
                 viewport={{ once: true }}
                 className="text-5xl md:text-6xl font-bold text-gold-gradient mb-2"
               >
-                {userData.charactersPerSecond}
+                {data.comparisons.charsPerSecond}
               </motion.div>
               <div className="text-muted-foreground">CPS</div>
             </div>
@@ -162,7 +166,7 @@ export function SlideCompare() {
               <div className="text-sm text-center">
                 <span className="text-muted-foreground">That's </span>
                 <span className="text-primary font-semibold">
-                  {(userData.charactersPerSecond * 60).toFixed(0)} characters
+                  {(data.comparisons.charsPerSecond * 60).toFixed(0)} characters
                 </span>
                 <span className="text-muted-foreground"> per minute</span>
               </div>
@@ -197,7 +201,7 @@ export function SlideCompare() {
                 <div className="text-2xl md:text-3xl font-bold text-foreground mb-2">The Great Gatsby</div>
                 <div className="text-muted-foreground">in just</div>
                 <div className="text-5xl font-bold text-gold-gradient text-glow-gold mt-2">
-                  {userData.gatsbyComparison} hours
+                  {data.comparisons.featuredNovel.timeHours} hours
                 </div>
               </motion.div>
             </div>

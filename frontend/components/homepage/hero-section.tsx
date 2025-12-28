@@ -1,10 +1,32 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { useState, useEffect } from "react"
 import { MonkeyMascot } from "./monkey-mascot"
 import { ChevronDown } from "lucide-react"
 
 export function HeroSection() {
+  // Generate random values only on client side to avoid hydration mismatch
+  const [floatingParticles, setFloatingParticles] = useState<Array<{
+    id: number;
+    left: number;
+    top: number;
+    duration: number;
+    delay: number;
+  }>>([])
+
+  useEffect(() => {
+    setFloatingParticles(
+      Array.from({ length: 30 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        duration: 4 + Math.random() * 3,
+        delay: Math.random() * 3,
+      }))
+    )
+  }, [])
+
   return (
     <section className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-background">
       {/* Animated background gradient orbs */}
@@ -29,13 +51,13 @@ export function HeroSection() {
 
       {/* Floating particles */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(30)].map((_, i) => (
+        {floatingParticles.map((particle) => (
           <motion.div
-            key={i}
+            key={particle.id}
             className="absolute w-1 h-1 bg-primary/40 rounded-full"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
             }}
             animate={{
               y: [0, -30, 0],
@@ -43,9 +65,9 @@ export function HeroSection() {
               scale: [1, 1.5, 1],
             }}
             transition={{
-              duration: 4 + Math.random() * 3,
+              duration: particle.duration,
               repeat: Number.POSITIVE_INFINITY,
-              delay: Math.random() * 3,
+              delay: particle.delay,
             }}
           />
         ))}

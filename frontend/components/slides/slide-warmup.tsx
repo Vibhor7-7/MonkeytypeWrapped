@@ -1,17 +1,36 @@
 "use client"
 
 import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
-import { userData } from "@/lib/mock-data"
+import { useRef, useMemo } from "react"
 import { Flame, Thermometer, TrendingUp } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
-export function SlideWarmup() {
+interface SlideWarmupProps {
+  data: WrappedData
+}
+
+export function SlideWarmup({ data }: SlideWarmupProps) {
   const ref = useRef<HTMLDivElement>(null)
   const chartRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(chartRef, { once: true })
 
-  const maxWpm = Math.max(...userData.warmupCurve.map((t) => t.wpm))
-  const minWpm = Math.min(...userData.warmupCurve.map((t) => t.wpm))
+  const maxWpm = Math.max(...data.warmup.warmupCurve.map((t) => t.avgWpm))
+  const minWpm = Math.min(...data.warmup.warmupCurve.map((t) => t.avgWpm))
+
+  // Generate random values once on client side to avoid hydration mismatch
+  const floatingDots = useMemo(() => 
+    Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      yOffset: -50 - Math.random() * 100,
+      xOffset: (Math.random() - 0.5) * 100,
+      scaleMax: 1 + Math.random(),
+      duration: 3 + Math.random() * 2,
+      delay: Math.random() * 3,
+    })),
+    []
+  )
 
   return (
     <section
@@ -19,25 +38,25 @@ export function SlideWarmup() {
       className="relative min-h-screen w-full flex items-center justify-center py-20 snap-start"
     >
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(50)].map((_, i) => (
+        {floatingDots.map((dot) => (
           <motion.div
-            key={i}
+            key={dot.id}
             className="absolute"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${dot.left}%`,
+              top: `${dot.top}%`,
             }}
             initial={{ opacity: 0, scale: 0 }}
             animate={{
-              y: [0, -50 - Math.random() * 100, 0],
-              x: [0, (Math.random() - 0.5) * 100, 0],
+              y: [0, dot.yOffset, 0],
+              x: [0, dot.xOffset, 0],
               opacity: [0, 0.3, 0],
-              scale: [0, 1 + Math.random(), 0],
+              scale: [0, dot.scaleMax, 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: dot.duration,
               repeat: Number.POSITIVE_INFINITY,
-              delay: Math.random() * 3,
+              delay: dot.delay,
               ease: "easeInOut",
             }}
           >
@@ -83,7 +102,7 @@ export function SlideWarmup() {
           >
             <Thermometer className="w-8 h-8 text-blue-400 mx-auto mb-4" />
             <div className="text-sm text-muted-foreground mb-2">Cold Start</div>
-            <div className="text-4xl font-bold text-foreground">{userData.coldStartWpm}</div>
+            <div className="text-4xl font-bold text-foreground">{data.warmup.coldStartWpm}</div>
             <div className="text-sm text-muted-foreground">WPM</div>
           </motion.div>
 
@@ -96,7 +115,7 @@ export function SlideWarmup() {
           >
             <Flame className="w-8 h-8 text-primary mx-auto mb-4 animate-pulse" />
             <div className="text-sm text-primary mb-2">Warmed Up Peak</div>
-            <div className="text-4xl font-bold text-gold-gradient">{userData.peakWarmedUpWpm}</div>
+            <div className="text-4xl font-bold text-gold-gradient">{data.warmup.warmedUpWpm}</div>
             <div className="text-sm text-muted-foreground">WPM</div>
           </motion.div>
 
@@ -109,7 +128,7 @@ export function SlideWarmup() {
           >
             <TrendingUp className="w-8 h-8 text-green-400 mx-auto mb-4" />
             <div className="text-sm text-muted-foreground mb-2">Tests to Peak</div>
-            <div className="text-4xl font-bold text-foreground">{userData.testsUntilPeak}</div>
+            <div className="text-4xl font-bold text-foreground">{data.warmup.testsUntilPeak}</div>
             <div className="text-sm text-muted-foreground">tests</div>
           </motion.div>
         </div>
@@ -140,10 +159,10 @@ export function SlideWarmup() {
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 300" preserveAspectRatio="none">
               {/* Path line */}
               <motion.path
-                d={userData.warmupCurve
+                d={data.warmup.warmupCurve
                   .map((point, i) => {
-                    const x = (i / (userData.warmupCurve.length - 1)) * 580 + 10
-                    const y = 280 - ((point.wpm - minWpm) / (maxWpm - minWpm)) * 260
+                    const x = (i / (data.warmup.warmupCurve.length - 1)) * 580 + 10
+                    const y = 280 - ((point.avgWpm - minWpm) / (maxWpm - minWpm)) * 260
                     return `${i === 0 ? "M" : "L"} ${x} ${y}`
                   })
                   .join(" ")}
@@ -167,10 +186,10 @@ export function SlideWarmup() {
               </defs>
 
               {/* Data points */}
-              {userData.warmupCurve.map((point, i) => {
-                const x = (i / (userData.warmupCurve.length - 1)) * 580 + 10
-                const y = 280 - ((point.wpm - minWpm) / (maxWpm - minWpm)) * 260
-                const isPeak = point.wpm === userData.peakWarmedUpWpm
+              {data.warmup.warmupCurve.map((point, i) => {
+                const x = (i / (data.warmup.warmupCurve.length - 1)) * 580 + 10
+                const y = 280 - ((point.avgWpm - minWpm) / (maxWpm - minWpm)) * 260
+                const isPeak = point.avgWpm === data.warmup.warmedUpWpm
 
                 return (
                   <motion.g key={i}>
@@ -206,7 +225,7 @@ export function SlideWarmup() {
 
             {/* Labels */}
             <div className="absolute bottom-0 left-0 right-0 flex justify-between px-2 pt-4">
-              {userData.warmupCurve.map((point, i) => (
+              {data.warmup.warmupCurve.map((point, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0 }}
@@ -214,8 +233,8 @@ export function SlideWarmup() {
                   transition={{ duration: 0.4, delay: 1 + i * 0.1 }}
                   className="text-center"
                 >
-                  <div className="text-xs text-muted-foreground font-mono">Test {point.test}</div>
-                  <div className="text-sm font-bold text-foreground">{point.wpm}</div>
+                  <div className="text-xs text-muted-foreground font-mono">Test {point.testNumber}</div>
+                  <div className="text-sm font-bold text-foreground">{point.avgWpm}</div>
                 </motion.div>
               ))}
             </div>
@@ -231,10 +250,10 @@ export function SlideWarmup() {
           >
             <span className="text-muted-foreground">Warmup boost: </span>
             <span className="text-2xl font-bold text-gold-gradient">
-              +{(userData.peakWarmedUpWpm - userData.coldStartWpm).toFixed(1)} WPM
+              +{(data.warmup.warmedUpWpm - data.warmup.coldStartWpm).toFixed(1)} WPM
             </span>
             <span className="text-muted-foreground ml-2">
-              ({(((userData.peakWarmedUpWpm - userData.coldStartWpm) / userData.coldStartWpm) * 100).toFixed(1)}%
+              ({(((data.warmup.warmedUpWpm - data.warmup.coldStartWpm) / data.warmup.coldStartWpm) * 100).toFixed(1)}%
               increase)
             </span>
           </motion.div>

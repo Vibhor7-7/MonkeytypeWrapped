@@ -1,11 +1,15 @@
 "use client"
 
 import { motion, useScroll, useInView } from "framer-motion"
-import { useRef } from "react"
-import { userData } from "@/lib/mock-data"
+import { useRef, useMemo } from "react"
 import { TrendingUp, Trophy, Rocket, Sparkles } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
-export function SlideJourney() {
+interface SlideJourneyProps {
+  data: WrappedData
+}
+
+export function SlideJourney({ data }: SlideJourneyProps) {
   const ref = useRef<HTMLDivElement>(null)
   const chartRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(chartRef, { once: true })
@@ -15,32 +19,47 @@ export function SlideJourney() {
     offset: ["start end", "end start"],
   })
 
-  const maxWpm = Math.max(...userData.monthlyProgress.map((m) => m.wpm))
-  const minWpm = Math.min(...userData.monthlyProgress.map((m) => m.wpm))
+  // Generate random values once on client side to avoid hydration mismatch
+  const floatingDots = useMemo(() => 
+    Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      yOffset: -50 - Math.random() * 100,
+      xOffset: (Math.random() - 0.5) * 100,
+      scaleMax: 1 + Math.random(),
+      duration: 3 + Math.random() * 2,
+      delay: Math.random() * 3,
+    })),
+    []
+  )
+
+  const maxWpm = Math.max(...data.journey.monthlyTrend.map((m) => m.avgWpm))
+  const minWpm = Math.min(...data.journey.monthlyTrend.map((m) => m.avgWpm))
   const range = maxWpm - minWpm
 
   return (
     <section ref={ref} className="relative h-full w-full flex items-center justify-center py-20 overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(50)].map((_, i) => (
+        {floatingDots.map((dot) => (
           <motion.div
-            key={i}
+            key={dot.id}
             className="absolute"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${dot.left}%`,
+              top: `${dot.top}%`,
             }}
             initial={{ opacity: 0, scale: 0 }}
             animate={{
-              y: [0, -50 - Math.random() * 100, 0],
-              x: [0, (Math.random() - 0.5) * 100, 0],
+              y: [0, dot.yOffset, 0],
+              x: [0, dot.xOffset, 0],
               opacity: [0, 0.3, 0],
-              scale: [0, 1 + Math.random(), 0],
+              scale: [0, dot.scaleMax, 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: dot.duration,
               repeat: Number.POSITIVE_INFINITY,
-              delay: Math.random() * 3,
+              delay: dot.delay,
               ease: "easeInOut",
             }}
           >
@@ -102,7 +121,7 @@ export function SlideJourney() {
               transition={{ duration: 0.5, delay: 0.3, type: "spring" }}
               viewport={{ once: true }}
             >
-              {userData.firstMonthAvg} WPM
+              {data.journey.firstMonthAvg} WPM
             </motion.div>
           </motion.div>
 
@@ -127,7 +146,7 @@ export function SlideJourney() {
               animate={{ scale: [1, 1.05, 1] }}
               transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
             >
-              +{userData.improvement}%
+              +{data.journey.improvement}%
             </motion.div>
           </motion.div>
 
@@ -147,7 +166,7 @@ export function SlideJourney() {
               transition={{ duration: 0.5, delay: 0.5, type: "spring" }}
               viewport={{ once: true }}
             >
-              {userData.lastMonthAvg} WPM
+              {data.journey.lastMonthAvg} WPM
             </motion.div>
           </motion.div>
         </div>
@@ -169,8 +188,8 @@ export function SlideJourney() {
               <Trophy className="w-5 h-5 text-primary" />
             </motion.div>
             <span className="text-sm text-muted-foreground">
-              Best Month: <span className="text-primary font-semibold">{userData.bestMonth}</span> (
-              {userData.bestMonthAvg} WPM)
+              Best Month: <span className="text-primary font-semibold">{data.journey.bestMonth}</span> (
+              {data.journey.bestMonthAvg} WPM)
             </span>
           </div>
 
@@ -184,10 +203,10 @@ export function SlideJourney() {
 
             <svg className="absolute ml-14 inset-0 w-[calc(100%-3.5rem)] h-full pointer-events-none">
               <motion.path
-                d={userData.monthlyProgress
+                d={data.journey.monthlyTrend
                   .map((month, i) => {
-                    const x = (i / (userData.monthlyProgress.length - 1)) * 100
-                    const height = ((month.wpm - minWpm + 10) / (range + 20)) * 100
+                    const x = (i / (data.journey.monthlyTrend.length - 1)) * 100
+                    const height = ((month.avgWpm - minWpm + 10) / (range + 20)) * 100
                     const y = 100 - height
                     return `${i === 0 ? "M" : "L"} ${x}% ${y}%`
                   })
@@ -211,9 +230,9 @@ export function SlideJourney() {
 
             {/* Chart area */}
             <div className="ml-14 h-full flex items-end gap-2 md:gap-4">
-              {userData.monthlyProgress.map((month, index) => {
-                const height = ((month.wpm - minWpm + 10) / (range + 20)) * 100
-                const isBestMonth = month.month === userData.bestMonth.substring(0, 3)
+              {data.journey.monthlyTrend.map((month, index) => {
+                const height = ((month.avgWpm - minWpm + 10) / (range + 20)) * 100
+                const isBestMonth = month.month === data.journey.bestMonth.substring(0, 3)
 
                 return (
                   <motion.div
@@ -241,7 +260,7 @@ export function SlideJourney() {
                           transition={{ duration: 0.4, delay: 0.8 + index * 0.05 }}
                           className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs font-mono text-foreground whitespace-nowrap"
                         >
-                          {month.wpm}
+                          {month.avgWpm}
                         </motion.div>
                         {isBestMonth && (
                           <motion.div
@@ -276,8 +295,8 @@ export function SlideJourney() {
               <Rocket className="w-4 h-4 text-primary" />
             </motion.div>
             <span className="text-muted-foreground">
-              Biggest jump: <span className="text-primary font-semibold">+{userData.biggestJump.amount} WPM</span> from{" "}
-              {userData.biggestJump.from} to {userData.biggestJump.to}
+              Biggest jump: <span className="text-primary font-semibold">+{data.journey.biggestJumpAmount} WPM</span> from{" "}
+              {data.journey.biggestJumpMonth} to {""}
             </span>
           </motion.div>
         </motion.div>

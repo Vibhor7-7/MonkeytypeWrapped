@@ -13,6 +13,7 @@ import { SlideAccuracy } from "@/components/slides/slide-accuracy"
 import { SlideCompare } from "@/components/slides/slide-compare"
 import { SlideSummary } from "@/components/slides/slide-summary"
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
 const slides = [
   { component: SlideHook, label: "Hook", direction: "vertical" },
@@ -43,7 +44,11 @@ const getVariants = (direction: "vertical" | "horizontal", isNext: boolean) => {
   }
 }
 
-export function WrappedExperience() {
+interface WrappedExperienceProps {
+  data: WrappedData
+}
+
+export function WrappedExperience({ data }: WrappedExperienceProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const [direction, setDirection] = useState<"next" | "prev">("next")
@@ -290,7 +295,7 @@ export function WrappedExperience() {
             onScroll={checkScrollBoundaries}
             className="h-full w-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40"
           >
-            <SlideComponent />
+            <SlideComponent data={data} />
           </div>
         </motion.div>
       </AnimatePresence>

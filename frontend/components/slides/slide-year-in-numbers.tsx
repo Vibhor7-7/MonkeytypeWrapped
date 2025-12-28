@@ -3,9 +3,9 @@
 import type React from "react"
 
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
-import { useRef } from "react"
-import { userData } from "@/lib/mock-data"
+import { useRef, useMemo } from "react"
 import { Target, Calendar, Flame, Zap } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
 function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null)
@@ -65,7 +65,11 @@ function StatCard({
   )
 }
 
-export function SlideYearInNumbers() {
+interface SlideYearInNumbersProps {
+  data: WrappedData
+}
+
+export function SlideYearInNumbers({ data }: SlideYearInNumbersProps) {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -74,31 +78,46 @@ export function SlideYearInNumbers() {
 
   const y = useTransform(scrollYProgress, [0, 1], ["20%", "-20%"])
 
+  // Generate random values once on client side to avoid hydration mismatch
+  const floatingDots = useMemo(() => 
+    Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      yOffset: -50 - Math.random() * 100,
+      xOffset: (Math.random() - 0.5) * 100,
+      scaleMax: 1 + Math.random(),
+      duration: 3 + Math.random() * 2,
+      delay: Math.random() * 3,
+    })),
+    []
+  )
+
   return (
     <section
       ref={ref}
       className="relative min-h-screen w-full flex items-center justify-center py-20 overflow-hidden snap-start"
     >
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(50)].map((_, i) => (
+        {floatingDots.map((dot) => (
           <motion.div
-            key={i}
+            key={dot.id}
             className="absolute"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${dot.left}%`,
+              top: `${dot.top}%`,
             }}
             initial={{ opacity: 0, scale: 0 }}
             animate={{
-              y: [0, -50 - Math.random() * 100, 0],
-              x: [0, (Math.random() - 0.5) * 100, 0],
+              y: [0, dot.yOffset, 0],
+              x: [0, dot.xOffset, 0],
               opacity: [0, 0.3, 0],
-              scale: [0, 1 + Math.random(), 0],
+              scale: [0, dot.scaleMax, 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: dot.duration,
               repeat: Number.POSITIVE_INFINITY,
-              delay: Math.random() * 3,
+              delay: dot.delay,
               ease: "easeInOut",
             }}
           >
@@ -134,16 +153,15 @@ export function SlideYearInNumbers() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <StatCard icon={Target} label="Tests Completed" value={userData.totalTests} delay={0.1} />
+          <StatCard icon={Target} label="Tests Completed" value={data.yearInNumbers.totalTests} delay={0.1} />
           <StatCard
             icon={Calendar}
             label="Active Days"
-            value={userData.activeDays}
-            suffix={`/${userData.totalDays}`}
+            value={data.yearInNumbers.activeDays}
             delay={0.2}
           />
-          <StatCard icon={Zap} label="Characters Typed" value={userData.totalCharacters} delay={0.3} />
-          <StatCard icon={Flame} label="Longest Streak" value={userData.longestStreak} suffix=" days" delay={0.4} />
+          <StatCard icon={Zap} label="Characters Typed" value={data.yearInNumbers.totalCharacters} delay={0.3} />
+          <StatCard icon={Flame} label="Longest Streak" value={data.yearInNumbers.longestStreak} suffix=" days" delay={0.4} />
         </div>
       </motion.div>
     </section>

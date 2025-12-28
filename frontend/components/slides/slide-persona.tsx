@@ -3,29 +3,36 @@
 import type React from "react"
 import { motion, useInView } from "framer-motion"
 import { useRef, useState } from "react"
-import { userData } from "@/lib/mock-data"
 import { Brain, Zap, TrendingUp, CloudOff, Sparkles } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
 const personaIcons: Record<string, React.ElementType> = {
   "Flow State": Brain,
-  "Burst Typer": Zap,
-  "Steady Climber": TrendingUp,
-  "Off Day": CloudOff,
+  "Speed Demon": Zap,
+  "Steady Eddie": TrendingUp,
+  "Warm Up Mode": CloudOff,
+  "Balanced Performer": Sparkles,
 }
 
-export function SlidePersona() {
+const personaColors = ["#3b82f6", "#8b5cf6", "#ec4899", "#f97316", "#10b981"]
+
+interface SlidePersonaProps {
+  data: WrappedData
+}
+
+export function SlidePersona({ data }: SlidePersonaProps) {
   const ref = useRef<HTMLDivElement>(null)
   const pieRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(pieRef, { once: true })
   const [hoveredSegment, setHoveredSegment] = useState<number | null>(null)
 
-  // Calculate pie chart segments
+  // Calculate pie chart segments with colors
   let cumulativePercentage = 0
-  const segments = userData.modeBreakdown.map((mode) => {
+  const segments = data.persona.allPersonas.map((mode, index) => {
     const startAngle = cumulativePercentage * 3.6
     cumulativePercentage += mode.percentage
     const endAngle = cumulativePercentage * 3.6
-    return { ...mode, startAngle, endAngle }
+    return { ...mode, startAngle, endAngle, color: personaColors[index % personaColors.length] }
   })
 
   return (
@@ -136,7 +143,7 @@ export function SlidePersona() {
                     transition={{ duration: 0.6, delay: 0.4, type: "spring", bounce: 0.4 }}
                     viewport={{ once: true }}
                   >
-                    {userData.dominantPersona}
+                    {data.persona.dominantPersona.name}
                   </motion.div>
                 </div>
               </div>
@@ -148,7 +155,7 @@ export function SlidePersona() {
                 transition={{ duration: 0.6, delay: 0.6 }}
                 viewport={{ once: true }}
               >
-                {userData.personaDescription}
+                {data.persona.dominantPersona.description}
               </motion.p>
             </motion.div>
           </motion.div>
@@ -178,7 +185,7 @@ export function SlidePersona() {
 
                   return (
                     <motion.circle
-                      key={segment.mode}
+                      key={segment.id}
                       cx="50"
                       cy="50"
                       r={radius}
@@ -216,12 +223,12 @@ export function SlidePersona() {
                 >
                   <div className="text-4xl font-bold text-gold-gradient">
                     {hoveredSegment !== null
-                      ? userData.modeBreakdown[hoveredSegment].percentage
-                      : userData.modeBreakdown[0].percentage}
+                      ? data.persona.allPersonas[hoveredSegment].percentage
+                      : data.persona.allPersonas[0].percentage}
                     %
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {hoveredSegment !== null ? userData.modeBreakdown[hoveredSegment].mode : "Flow State"}
+                    {hoveredSegment !== null ? data.persona.allPersonas[hoveredSegment].name : "Flow State"}
                   </div>
                 </motion.div>
               </div>
@@ -229,13 +236,13 @@ export function SlidePersona() {
 
             {/* Legend - Enhanced with hover interactions */}
             <div className="grid grid-cols-2 gap-4 mt-8">
-              {userData.modeBreakdown.map((mode, index) => {
-                const Icon = personaIcons[mode.mode] || Brain
+              {data.persona.allPersonas.map((mode, index) => {
+                const Icon = personaIcons[mode.name] || Brain
                 const isHovered = hoveredSegment === index
 
                 return (
                   <motion.div
-                    key={mode.mode}
+                    key={mode.id}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
@@ -255,7 +262,7 @@ export function SlidePersona() {
                     <div className="flex items-center gap-2">
                       <Icon className={`w-4 h-4 ${isHovered ? "text-primary" : "text-muted-foreground"}`} />
                       <span className={`text-sm ${isHovered ? "text-foreground" : "text-foreground"}`}>
-                        {mode.mode}
+                        {mode.name}
                       </span>
                     </div>
                     <span className={`text-sm font-mono ${isHovered ? "text-primary font-bold" : "text-primary"}`}>

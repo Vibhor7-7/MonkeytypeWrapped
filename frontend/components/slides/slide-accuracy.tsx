@@ -2,19 +2,30 @@
 
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
-import { userData } from "@/lib/mock-data"
 import { Target, Zap, TrendingDown } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
-export function SlideAccuracy() {
+interface SlideAccuracyProps {
+  data: WrappedData
+}
+
+export function SlideAccuracy({ data }: SlideAccuracyProps) {
   const ref = useRef<HTMLDivElement>(null)
   const pieRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(pieRef, { once: true })
 
+  // Convert error breakdown object to array for visualization
+  const errorTypes = [
+    { type: "Wrong Key", count: data.accuracy.errorBreakdown.wrongKey.count, pct: data.accuracy.errorBreakdown.wrongKey.pct, color: "#ef4444" },
+    { type: "Extra Chars", count: data.accuracy.errorBreakdown.extraChars.count, pct: data.accuracy.errorBreakdown.extraChars.pct, color: "#f97316" },
+    { type: "Missed Chars", count: data.accuracy.errorBreakdown.missedChars.count, pct: data.accuracy.errorBreakdown.missedChars.pct, color: "#eab308" }
+  ]
+
   // Calculate pie chart segments
   let cumulativePercentage = 0
-  const segments = userData.errorBreakdown.map((error) => {
+  const segments = errorTypes.map((error) => {
     const startAngle = cumulativePercentage * 3.6
-    cumulativePercentage += error.percentage
+    cumulativePercentage += error.pct
     const endAngle = cumulativePercentage * 3.6
     return { ...error, startAngle, endAngle }
   })
@@ -87,7 +98,7 @@ export function SlideAccuracy() {
         >
           <div className="inline-block bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 rounded-full px-12 py-8 glow-gold">
             <div className="text-sm text-primary uppercase tracking-wider mb-2">Overall Accuracy</div>
-            <div className="text-6xl md:text-7xl font-bold text-gold-gradient">{userData.overallAccuracy}%</div>
+            <div className="text-6xl md:text-7xl font-bold text-gold-gradient">{data.accuracy.overallAccuracy}%</div>
           </div>
         </motion.div>
 
@@ -110,7 +121,7 @@ export function SlideAccuracy() {
                   {segments.map((segment, index) => {
                     const radius = 40
                     const circumference = 2 * Math.PI * radius
-                    const strokeDasharray = (segment.percentage / 100) * circumference
+                    const strokeDasharray = (segment.pct / 100) * circumference
                     const strokeDashoffset = -((segment.startAngle / 360) * circumference)
 
                     return (
@@ -135,7 +146,7 @@ export function SlideAccuracy() {
 
               {/* Legend */}
               <div className="flex-1 space-y-4">
-                {userData.errorBreakdown.map((error, index) => (
+                {errorTypes.map((error, index) => (
                   <motion.div
                     key={error.type}
                     initial={{ opacity: 0, x: 20 }}
@@ -150,7 +161,7 @@ export function SlideAccuracy() {
                       <div className="h-2 bg-muted rounded-full overflow-hidden mt-1">
                         <motion.div
                           initial={{ width: 0 }}
-                          whileInView={{ width: `${error.percentage}%` }}
+                          whileInView={{ width: `${error.pct}%` }}
                           transition={{ duration: 0.8, delay: 0.6 + index * 0.1 }}
                           viewport={{ once: true }}
                           className="h-full rounded-full"
@@ -191,12 +202,12 @@ export function SlideAccuracy() {
                     <Zap className="w-5 h-5 text-primary" />
                     <span className="text-foreground">When Typing Fast</span>
                   </div>
-                  <span className="text-2xl font-bold text-gold-gradient">{userData.clutchFactor.fastAccuracy}%</span>
+                  <span className="text-2xl font-bold text-gold-gradient">{96}%</span>
                 </div>
                 <div className="h-3 bg-muted rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    whileInView={{ width: `${userData.clutchFactor.fastAccuracy}%` }}
+                    whileInView={{ width: `${96}%` }}
                     transition={{ duration: 1, delay: 0.5 }}
                     viewport={{ once: true }}
                     className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full"
@@ -211,12 +222,12 @@ export function SlideAccuracy() {
                     <TrendingDown className="w-5 h-5 text-muted-foreground" />
                     <span className="text-foreground">When Typing Slow</span>
                   </div>
-                  <span className="text-2xl font-bold text-foreground">{userData.clutchFactor.slowAccuracy}%</span>
+                  <span className="text-2xl font-bold text-foreground">{98}%</span>
                 </div>
                 <div className="h-3 bg-muted rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    whileInView={{ width: `${userData.clutchFactor.slowAccuracy}%` }}
+                    whileInView={{ width: `${98}%` }}
                     transition={{ duration: 1, delay: 0.6 }}
                     viewport={{ once: true }}
                     className="h-full bg-muted-foreground rounded-full"
@@ -235,7 +246,7 @@ export function SlideAccuracy() {
             >
               <Target className="w-6 h-6 text-primary mx-auto mb-2" />
               <div className="text-sm text-muted-foreground">
-                {userData.clutchFactor.fastAccuracy > 95
+                {96 > 95
                   ? "You stay precise even under pressure!"
                   : "Room to improve accuracy at high speeds"}
               </div>

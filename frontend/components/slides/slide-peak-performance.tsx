@@ -2,10 +2,14 @@
 
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
 import { useRef } from "react"
-import { userData } from "@/lib/mock-data"
 import { Crown, Sparkles, Target, BarChart3 } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
-export function SlidePeakPerformance() {
+interface SlidePeakPerformanceProps {
+  data: WrappedData
+}
+
+export function SlidePeakPerformance({ data }: SlidePeakPerformanceProps) {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -100,12 +104,12 @@ export function SlidePeakPerformance() {
               viewport={{ once: true }}
               className="text-7xl md:text-9xl font-bold text-gold-gradient text-glow-gold mb-4"
             >
-              {userData.allTimePB}
+              {data.peakPerformance.allTimePb}
             </motion.div>
 
             <div className="text-2xl text-foreground font-mono mb-4">WPM</div>
             <div className="text-muted-foreground">
-              Achieved on <span className="text-primary font-semibold">{userData.pbDate}</span>
+              Achieved on <span className="text-primary font-semibold">{data.peakPerformance.pbDate}</span>
             </div>
           </div>
         </motion.div>
@@ -125,7 +129,7 @@ export function SlidePeakPerformance() {
               </div>
               <span className="text-sm text-muted-foreground">PBs This Year</span>
             </div>
-            <div className="text-4xl font-bold text-gold-gradient">{userData.totalPBsThisYear}</div>
+            <div className="text-4xl font-bold text-gold-gradient">{data.peakPerformance.totalPbsHit}</div>
           </motion.div>
 
           <motion.div
@@ -141,7 +145,7 @@ export function SlidePeakPerformance() {
               </div>
               <span className="text-sm text-muted-foreground">Perfect Accuracy</span>
             </div>
-            <div className="text-4xl font-bold text-gold-gradient">{userData.perfectAccuracyTests}</div>
+            <div className="text-4xl font-bold text-gold-gradient">{data.peakPerformance.perfectAccuracyCount}</div>
             <div className="text-sm text-muted-foreground">tests with 100%</div>
           </motion.div>
 
@@ -159,9 +163,9 @@ export function SlidePeakPerformance() {
               <span className="text-sm text-muted-foreground">Speed Tiers</span>
             </div>
             <div className="space-y-2">
-              {userData.thresholdBreakdown.slice(0, 3).map((tier, index) => (
-                <div key={tier.threshold} className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground font-mono">≥{tier.threshold} WPM</span>
+              {data.peakPerformance.thresholds.slice(0, 3).map((tier, index) => (
+                <div key={tier.wpm} className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground font-mono">≥{tier.wpm} WPM</span>
                   <span className="text-sm font-bold text-primary">{tier.count}</span>
                 </div>
               ))}
@@ -179,14 +183,14 @@ export function SlidePeakPerformance() {
         >
           <h3 className="text-lg font-semibold mb-6 text-center">Speed Threshold Breakdown</h3>
           <div className="flex items-end justify-center gap-4 h-40">
-            {userData.thresholdBreakdown.map((tier, index) => {
-              const maxCount = Math.max(...userData.thresholdBreakdown.map((t) => t.count))
+            {data.peakPerformance.thresholds.map((tier, index) => {
+              const maxCount = Math.max(...data.peakPerformance.thresholds.map((t) => t.count))
               const height = (tier.count / maxCount) * 100
 
               return (
                 <ThresholdBar
-                  key={tier.threshold}
-                  threshold={tier.threshold}
+                  key={tier.wpm}
+                  threshold={tier.wpm}
                   count={tier.count}
                   height={height}
                   delay={0.7 + index * 0.1}
@@ -215,22 +219,25 @@ function ThresholdBar({
   const isInView = useInView(ref, { once: true })
 
   return (
-    <div ref={ref} className="flex flex-col items-center gap-2">
-      <motion.div
-        initial={{ height: 0 }}
-        animate={isInView ? { height: `${height}%` } : {}}
-        transition={{ duration: 0.8, delay, type: "spring" }}
-        className="w-12 md:w-16 bg-gradient-to-t from-primary/50 to-primary rounded-t-lg relative"
-      >
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.4, delay: delay + 0.3 }}
-          className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-mono text-foreground"
+    <div ref={ref} className="flex flex-col items-center gap-2 h-full justify-end">
+      <div className="relative flex flex-col justify-end" style={{ height: '100%' }}>
+        <motion.div
+          initial={{ height: 0 }}
+          animate={isInView ? { height: `${height}%` } : {}}
+          transition={{ duration: 0.8, delay, type: "spring" }}
+          className="w-12 md:w-16 bg-gradient-to-t from-primary/50 to-primary rounded-t-lg relative"
+          style={{ minHeight: count > 0 ? '20px' : '0px' }}
         >
-          {count}
-        </motion.span>
-      </motion.div>
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.4, delay: delay + 0.3 }}
+            className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-mono text-foreground whitespace-nowrap"
+          >
+            {count}
+          </motion.span>
+        </motion.div>
+      </div>
       <span className="text-xs text-muted-foreground font-mono">≥{threshold}</span>
     </div>
   )

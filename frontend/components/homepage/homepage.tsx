@@ -6,7 +6,7 @@ import { VideoSection } from "./video-section"
 import { UploadFlow } from "./upload-flow"
 
 interface HomepageProps {
-  onFileUpload: () => void
+  onFileUpload: (file: File) => void
 }
 
 export function Homepage({ onFileUpload }: HomepageProps) {

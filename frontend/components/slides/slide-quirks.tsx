@@ -2,10 +2,14 @@
 
 import { motion } from "framer-motion"
 import { useRef } from "react"
-import { userData } from "@/lib/mock-data"
 import { RotateCcw, Clock, Target, Gamepad2 } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
-export function SlideQuirks() {
+interface SlideQuirksProps {
+  data: WrappedData
+}
+
+export function SlideQuirks({ data }: SlideQuirksProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   // Calculate restart addiction level
@@ -16,7 +20,7 @@ export function SlideQuirks() {
     return { label: "Low", color: "#22c55e" }
   }
 
-  const addictionLevel = getAddictionLevel(userData.restartAddictionScore)
+  const addictionLevel = getAddictionLevel(((data.quirks.avgRestarts / 5) * 100))
 
   return (
     <section
@@ -102,12 +106,12 @@ export function SlideQuirks() {
             <div className="mb-6">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-muted-foreground">Addiction Score</span>
-                <span className="font-mono text-primary">{userData.restartAddictionScore}/100</span>
+                <span className="font-mono text-primary">{Math.min(100, Math.round((data.quirks.avgRestarts / 5) * 100))}/100</span>
               </div>
               <div className="h-3 bg-muted rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  whileInView={{ width: `${userData.restartAddictionScore}%` }}
+                  whileInView={{ width: `${Math.min(100, (data.quirks.avgRestarts / 5) * 100)}%` }}
                   transition={{ duration: 1, delay: 0.3 }}
                   viewport={{ once: true }}
                   className="h-full rounded-full"
@@ -121,11 +125,11 @@ export function SlideQuirks() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-muted/50 rounded-xl p-4">
                 <div className="text-sm text-muted-foreground mb-1">Avg Restarts</div>
-                <div className="text-2xl font-bold text-foreground">{userData.avgRestarts}</div>
+                <div className="text-2xl font-bold text-foreground">{data.quirks.avgRestarts}</div>
               </div>
               <div className="bg-muted/50 rounded-xl p-4">
                 <div className="text-sm text-muted-foreground mb-1">Max Ever</div>
-                <div className="text-2xl font-bold text-primary">{userData.maxRestarts}</div>
+                <div className="text-2xl font-bold text-primary">{data.quirks.maxRestarts}</div>
               </div>
             </div>
           </motion.div>
@@ -156,9 +160,9 @@ export function SlideQuirks() {
                 viewport={{ once: true }}
                 className="text-6xl md:text-7xl font-bold text-gold-gradient mb-2"
               >
-                {userData.timeWastedOnRestarts}
+                {Math.round(data.quirks.timeWastedMinutes)}
               </motion.div>
-              <div className="text-xl text-muted-foreground">hours "wasted"</div>
+              <div className="text-xl text-muted-foreground">minutes "wasted"</div>
               <div className="text-sm text-primary mt-2">(but were they really wasted?)</div>
             </div>
           </motion.div>
@@ -200,17 +204,17 @@ export function SlideQuirks() {
                   strokeWidth="8"
                   strokeLinecap="round"
                   className="text-primary"
-                  strokeDasharray={`${userData.firstTrySuccessRate * 2.51} 251`}
+                  strokeDasharray={`${50 * 2.51} 251`}
                   transform="rotate(-90 50 50)"
                   initial={{ strokeDasharray: "0 251" }}
-                  whileInView={{ strokeDasharray: `${userData.firstTrySuccessRate * 2.51} 251` }}
+                  whileInView={{ strokeDasharray: `${50 * 2.51} 251` }}
                   transition={{ duration: 1.5, delay: 0.4 }}
                   viewport={{ once: true }}
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-gold-gradient">{userData.firstTrySuccessRate}%</div>
+                  <div className="text-3xl font-bold text-gold-gradient">{50}%</div>
                   <div className="text-xs text-muted-foreground">First Try</div>
                 </div>
               </div>
@@ -243,7 +247,7 @@ export function SlideQuirks() {
                 className="inline-block"
               >
                 <div className="text-4xl md:text-5xl font-bold text-gold-gradient text-glow-gold">
-                  {userData.favoriteTestMode}
+                  {"60 seconds"}
                 </div>
                 <div className="text-sm text-muted-foreground mt-2">Your go-to challenge</div>
               </motion.div>

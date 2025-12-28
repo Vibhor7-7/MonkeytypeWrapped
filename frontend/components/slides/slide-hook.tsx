@@ -2,10 +2,14 @@
 
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef, useEffect, useState } from "react"
-import { userData } from "@/lib/mock-data"
 import { Keyboard } from "lucide-react"
+import { type WrappedData } from "@/lib/api"
 
-export function SlideHook() {
+interface SlideHookProps {
+  data: WrappedData
+}
+
+export function SlideHook({ data }: SlideHookProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [typedWords, setTypedWords] = useState(0)
   const { scrollYProgress } = useScroll({
@@ -19,7 +23,7 @@ export function SlideHook() {
   const rotateX = useTransform(scrollYProgress, [0, 0.5], [0, 20])
 
   useEffect(() => {
-    const target = userData.totalWordsTyped
+    const target = data.hook.totalWords
     const duration = 2000
     const steps = 60
     const increment = target / steps
@@ -36,7 +40,7 @@ export function SlideHook() {
     }, duration / steps)
 
     return () => clearInterval(timer)
-  }, [])
+  }, [data.hook.totalWords])
 
   return (
     <section
@@ -162,7 +166,7 @@ export function SlideHook() {
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 0.5, delay: 1.2 }}
           >
-            {userData.novelComparison} novels
+            {data.hook.novelComparison}
           </motion.span>{" "}
           worth of typing
         </motion.p>
@@ -179,7 +183,7 @@ export function SlideHook() {
               animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
             />
-            <span className="font-mono">{userData.totalTimeSpentHours} hours at the keyboard</span>
+            <span className="font-mono">{data.hook.totalTimeHours} hours at the keyboard</span>
           </div>
         </motion.div>
 
