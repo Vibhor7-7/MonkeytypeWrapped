@@ -4,7 +4,7 @@ import type React from "react"
 
 import { motion, useInView } from "framer-motion"
 import { useRef, useState, useCallback } from "react"
-import { Upload, FileText, CheckCircle, ExternalLink, Copy, ArrowRight } from "lucide-react"
+import { Upload, FileText, CheckCircle, ExternalLink, Copy, ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface UploadFlowProps {
@@ -37,7 +37,24 @@ export function UploadFlow({ onFileUpload }: UploadFlowProps) {
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [isDragging, setIsDragging] = useState(false)
   const [fileUploaded, setFileUploaded] = useState(false)
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleDemoClick = useCallback(async () => {
+    setIsLoadingDemo(true)
+    try {
+      const response = await fetch('/demo-data.csv')
+      const blob = await response.blob()
+      const file = new File([blob], 'demo-data.csv', { type: 'text/csv' })
+      
+      setFileUploaded(true)
+      setTimeout(() => onFileUpload(file), 800)
+    } catch (error) {
+      console.error('Failed to load demo data:', error)
+      alert('Failed to load demo data')
+      setIsLoadingDemo(false)
+    }
+  }, [onFileUpload])
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -240,31 +257,42 @@ export function UploadFlow({ onFileUpload }: UploadFlowProps) {
               />
             )}
           </motion.div>
+
+          {/* Demo Button */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="mt-6 text-center"
+          >
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="h-px w-16 bg-border" />
+              <span className="text-sm text-muted-foreground">OR</span>
+              <div className="h-px w-16 bg-border" />
+            </div>
+            <Button
+              onClick={handleDemoClick}
+              disabled={fileUploaded || isLoadingDemo}
+              variant="outline"
+              size="lg"
+              className="border-primary/30 hover:bg-primary/10 hover:border-primary/50 gap-2 px-8 bg-transparent disabled:opacity-50 group"
+            >
+              <motion.div
+                animate={isLoadingDemo ? { rotate: 360 } : {}}
+                transition={{ duration: 1, repeat: isLoadingDemo ? Number.POSITIVE_INFINITY : 0, ease: "linear" }}
+              >
+                <Sparkles className="w-4 h-4 text-primary group-hover:text-primary" />
+              </motion.div>
+              <span>
+                {isLoadingDemo ? 'Loading Demo...' : 'Try Demo Data'}
+              </span>
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              No account? Try our sample data
+            </p>
+          </motion.div>
         </motion.div>
       </div>
     </section>
-  )
-}
-
-function Sparkles(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-      <path d="M5 3v4" />
-      <path d="M19 17v4" />
-      <path d="M3 5h4" />
-      <path d="M17 19h4" />
-    </svg>
   )
 }
