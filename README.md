@@ -7,10 +7,10 @@ Check it out here: https://monkeytype-wrapped.vercel.app/
 ## ✨ Features
 
 - **11-slide animated presentation** of your typing year
-- **ML-powered persona detection** — discover your typing "modes" using clustering
-- **Warmup curve analysis** — see how your performance changes within sessions
-- **Timing insights** — find your peak typing hours and best days
-- **Shareable summary card** — flex your stats
+- **ML-powered persona detection**: discover your typing "modes" using clustering
+- **Warmup curve analysis**: see how your performance changes within sessions
+- **Timing insights**: find your peak typing hours and best days
+- **Shareable summary card**: flex your stats
 
 ## 🛠 Tech Stack
 
