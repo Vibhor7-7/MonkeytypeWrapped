@@ -23,10 +23,11 @@ app = FastAPI(
 # This allows your frontend (running on a different port/domain) to call this API
 app.add_middleware(
     CORSMiddleware,
+    allow_origin_regex=r"https://.*\.vercel\.app",  # Vercel deployments
     allow_origins=[
         "http://localhost:3000",      # Local development
         "http://127.0.0.1:3000",      # Alternative localhost
-        "https://*.vercel.app",       # Vercel preview and production deployments
+        "https://monkeytype-wrapped.vercel.app",  # Production domain
     ],
     allow_credentials=True,
     allow_methods=["*"],              # Allow all HTTP methods (GET, POST, etc.)
