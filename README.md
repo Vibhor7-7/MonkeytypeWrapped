@@ -2,7 +2,7 @@
 
 Your year in typing, beautifully visualized. Upload your MonkeyType data and get a personalized "Spotify Wrapped" style breakdown of your typing stats.
 
-![MonkeyType Wrapped Preview](preview.png)
+Check it out here: https://monkeytype-wrapped.vercel.app/
 
 ## ✨ Features
 
