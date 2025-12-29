@@ -204,17 +204,17 @@ export function SlideQuirks({ data }: SlideQuirksProps) {
                   strokeWidth="8"
                   strokeLinecap="round"
                   className="text-primary"
-                  strokeDasharray={`${50 * 2.51} 251`}
+                  strokeDasharray={`${data.quirks.firstTryPct * 2.51} 251`}
                   transform="rotate(-90 50 50)"
                   initial={{ strokeDasharray: "0 251" }}
-                  whileInView={{ strokeDasharray: `${50 * 2.51} 251` }}
+                  whileInView={{ strokeDasharray: `${data.quirks.firstTryPct * 2.51} 251` }}
                   transition={{ duration: 1.5, delay: 0.4 }}
                   viewport={{ once: true }}
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-gold-gradient">{50}%</div>
+                  <div className="text-3xl font-bold text-gold-gradient">{data.quirks.firstTryPct.toFixed(1)}%</div>
                   <div className="text-xs text-muted-foreground">First Try</div>
                 </div>
               </div>
@@ -247,9 +247,9 @@ export function SlideQuirks({ data }: SlideQuirksProps) {
                 className="inline-block"
               >
                 <div className="text-4xl md:text-5xl font-bold text-gold-gradient text-glow-gold">
-                  {"60 seconds"}
+                  {data.quirks.favoriteMode}
                 </div>
-                <div className="text-sm text-muted-foreground mt-2">Your go-to challenge</div>
+                <div className="text-sm text-muted-foreground mt-2">Used {data.quirks.favoriteModeCount.toLocaleString()} times</div>
               </motion.div>
             </div>
           </motion.div>

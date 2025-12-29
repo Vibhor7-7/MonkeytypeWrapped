@@ -170,7 +170,7 @@ export function SlideAccuracy({ data }: SlideAccuracyProps) {
                       </div>
                     </div>
                     <span className="text-lg font-bold font-mono" style={{ color: error.color }}>
-                      {error.percentage}%
+                      {error.pct.toFixed(1)}%
                     </span>
                   </motion.div>
                 ))}
@@ -202,12 +202,12 @@ export function SlideAccuracy({ data }: SlideAccuracyProps) {
                     <Zap className="w-5 h-5 text-primary" />
                     <span className="text-foreground">When Typing Fast</span>
                   </div>
-                  <span className="text-2xl font-bold text-gold-gradient">{96}%</span>
+                  <span className="text-2xl font-bold text-gold-gradient">{data.accuracy.clutchFactor.fastTestsAccuracy.toFixed(1)}%</span>
                 </div>
                 <div className="h-3 bg-muted rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    whileInView={{ width: `${96}%` }}
+                    whileInView={{ width: `${data.accuracy.clutchFactor.fastTestsAccuracy}%` }}
                     transition={{ duration: 1, delay: 0.5 }}
                     viewport={{ once: true }}
                     className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full"
@@ -222,12 +222,12 @@ export function SlideAccuracy({ data }: SlideAccuracyProps) {
                     <TrendingDown className="w-5 h-5 text-muted-foreground" />
                     <span className="text-foreground">When Typing Slow</span>
                   </div>
-                  <span className="text-2xl font-bold text-foreground">{98}%</span>
+                  <span className="text-2xl font-bold text-foreground">{data.accuracy.clutchFactor.slowTestsAccuracy.toFixed(1)}%</span>
                 </div>
                 <div className="h-3 bg-muted rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    whileInView={{ width: `${98}%` }}
+                    whileInView={{ width: `${data.accuracy.clutchFactor.slowTestsAccuracy}%` }}
                     transition={{ duration: 1, delay: 0.6 }}
                     viewport={{ once: true }}
                     className="h-full bg-muted-foreground rounded-full"
@@ -246,7 +246,7 @@ export function SlideAccuracy({ data }: SlideAccuracyProps) {
             >
               <Target className="w-6 h-6 text-primary mx-auto mb-2" />
               <div className="text-sm text-muted-foreground">
-                {96 > 95
+                {data.accuracy.clutchFactor.fastTestsAccuracy > 95
                   ? "You stay precise even under pressure!"
                   : "Room to improve accuracy at high speeds"}
               </div>
