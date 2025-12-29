@@ -12,7 +12,8 @@ def parse_csv(file_contents: bytes) ->pd.DataFrame:
     - Return cleaned DataFrame
     """
     # Convert bytes to Dataframe (BytesIo wraps the bytes so pandas can read it like a file)
-    df = pd.read_csv(BytesIO(file_contents))
+    # on_bad_lines='skip' will skip malformed lines instead of erroring
+    df = pd.read_csv(BytesIO(file_contents), on_bad_lines='skip')
 
     print(f"Loaded CSV: {len(df)} tests found")
     print(f"Columns: {list(df.columns)}")
