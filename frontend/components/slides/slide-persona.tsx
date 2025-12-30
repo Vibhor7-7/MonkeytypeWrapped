@@ -223,12 +223,12 @@ export function SlidePersona({ data }: SlidePersonaProps) {
                 >
                   <div className="text-4xl font-bold text-gold-gradient">
                     {hoveredSegment !== null
-                      ? data.persona.allPersonas[hoveredSegment].percentage
-                      : data.persona.allPersonas[0].percentage}
+                      ? segments[hoveredSegment].percentage
+                      : data.persona.dominantPersona.percentage}
                     %
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {hoveredSegment !== null ? data.persona.allPersonas[hoveredSegment].name : "Flow State"}
+                    {hoveredSegment !== null ? segments[hoveredSegment].name : data.persona.dominantPersona.name}
                   </div>
                 </motion.div>
               </div>
