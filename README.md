@@ -4,7 +4,7 @@ Your year in typing, beautifully visualized. Upload your MonkeyType data and get
 
 Check it out here: https://monkeytype-wrapped.vercel.app/
 
-## ✨ Features
+## Features
 
 - **11-slide animated presentation** of your typing year
 - **ML-powered persona detection**: discover your typing "modes" using clustering
@@ -12,7 +12,7 @@ Check it out here: https://monkeytype-wrapped.vercel.app/
 - **Timing insights**: find your peak typing hours and best days
 - **Shareable summary card**: flex your stats
 
-## 🛠 Tech Stack
+## Tech Stack
 
 **Frontend**
 - Next.js + TypeScript
@@ -25,7 +25,7 @@ Check it out here: https://monkeytype-wrapped.vercel.app/
 - Pandas & NumPy (data processing)
 - Scikit-learn (clustering/ML)
 
-## 📊 Stats Calculated using Numpy/Pandas
+## Stats Calculated using Numpy/Pandas
 
 | Category | Examples |
 |----------|----------|
@@ -40,7 +40,7 @@ Check it out here: https://monkeytype-wrapped.vercel.app/
 | Comparison | Estimated global percentile |
 
 
-## 🤖 How the ML Works
+## How the ML Works
 
 We use **K-means clustering** on three features (WPM, accuracy, consistency) to identify your typing "personas":
 
@@ -48,11 +48,11 @@ We use **K-means clustering** on three features (WPM, accuracy, consistency) to 
 
 The algorithm finds natural groupings in *your* data, so the personas are personalized to your typing patterns. (Unspervised Learning)
 
-## 📝 License
+## License
 
 MIT
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [MonkeyType](https://monkeytype.com) for being awesome
 - Inspired by Spotify Wrapped
