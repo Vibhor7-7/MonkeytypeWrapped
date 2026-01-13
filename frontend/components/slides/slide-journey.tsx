@@ -180,7 +180,7 @@ export function SlideJourney({ data }: SlideJourneyProps) {
           viewport={{ once: true }}
           className="relative bg-card/30 backdrop-blur-sm border border-primary/10 rounded-2xl p-6 md:p-8"
         >
-          <div className="flex items-center gap-3 mb-6">
+          <div className="relative z-10 flex items-center gap-3 mb-6">
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ duration: 0.5, repeat: Number.POSITIVE_INFINITY, repeatDelay: 3 }}
