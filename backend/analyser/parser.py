@@ -18,6 +18,16 @@ def parse_csv(file_contents: bytes) ->pd.DataFrame:
     print(f"Loaded CSV: {len(df)} tests found")
     print(f"Columns: {list(df.columns)}")
 
+    # Verify required columns exist
+    required_columns = ['wpm', 'acc']
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        raise ValueError(f"CSV is missing required columns: {missing_columns}")
+
+    # Check if timestamp column exists, if not try to find alternative
+    if 'timestamp' not in df.columns:
+        raise ValueError("CSV is missing 'timestamp' column. Please export your data from MonkeyType with timestamps included.")
+
     #Convert timestamp from milliseconds to datetime 
     # unit = 'ms' tells pandas the timestamp is in milliseconds 
 
@@ -38,23 +48,36 @@ def parse_csv(file_contents: bytes) ->pd.DataFrame:
     # Parse charStats string into separate columns
     # charStats format: "correct;incorrect;extra;missed"
 
-    # Split the string by ';' and convert to integers
-    char_stats_split = df['charStats'].str.split(';', expand=True).astype(int)
-    
-    # Assign to new columns with meaningful names
-    df['chars_correct'] = char_stats_split[0]
-    df['chars_incorrect'] = char_stats_split[1]
-    df['chars_extra'] = char_stats_split[2]
-    df['chars_missed'] = char_stats_split[3]
-    
-    # Calculate total characters typed (useful for analysis)
-    df['total_chars'] = df['chars_correct'] + df['chars_incorrect'] + df['chars_extra']
-    
-    print(f" Parsed Char stats")
+    # Check if charStats column exists
+    if 'charStats' in df.columns:
+        # Fill NaN/None values with "0;0;0;0" before splitting
+        df['charStats'] = df['charStats'].fillna('0;0;0;0')
+        
+        # Split the string by ';' and convert to integers with error handling
+        char_stats_split = df['charStats'].str.split(';', expand=True)
+        
+        # Convert to numeric, coercing errors to NaN, then fill with 0
+        df['chars_correct'] = pd.to_numeric(char_stats_split[0], errors='coerce').fillna(0).astype(int)
+        df['chars_incorrect'] = pd.to_numeric(char_stats_split[1], errors='coerce').fillna(0).astype(int)
+        df['chars_extra'] = pd.to_numeric(char_stats_split[2], errors='coerce').fillna(0).astype(int)
+        df['chars_missed'] = pd.to_numeric(char_stats_split[3], errors='coerce').fillna(0).astype(int)
+        
+        # Calculate total characters typed (useful for analysis)
+        df['total_chars'] = df['chars_correct'] + df['chars_incorrect'] + df['chars_extra']
+        
+        print(f" Parsed Char stats")
+    else:
+        # If charStats doesn't exist, create default columns with 0
+        print(f" Warning: charStats column not found, using default values")
+        df['chars_correct'] = 0
+        df['chars_incorrect'] = 0
+        df['chars_extra'] = 0
+        df['chars_missed'] = 0
+        df['total_chars'] = 0
 
 
     #Clean and validate data 
-    df['total_chars'] = df['chars_correct'] + df['chars_incorrect'] + df['chars_extra']
+    # Note: total_chars already calculated above
     
     # Step 5: Clean and validate data
     
