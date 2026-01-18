@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent))
 
 from analyser import parser, core_stats, clustering, journey, timing, warmup, comparisons
-# from models.schemas import WrappedData
+
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -20,7 +20,7 @@ app = FastAPI(
 )  
 
 # CORS Configuration
-# This allows your frontend (running on a different port/domain) to call this API
+# This allows frontend (running on a different port/domain) to call this API
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r"https://.*\.vercel\.app",  # Vercel deployments
@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"],              # Allow all headers
 )
 
-# Health check endpoint - useful for deployment monitoring
+# Health check endpoint
 @app.get("/")
 async def root():
     """
@@ -107,7 +107,7 @@ async def analyze_typing_data(file: UploadFile = File(...)):
         preview_df = preview_df.replace({float('nan'): None, float('inf'): None, float('-inf'): None})
         
         # Step 6: Return basic info for now (placeholder response)
-        # TODO: Replace this with actual analysis once modules are implemented
+        # Replace this with actual analysis once modules are implemented
         response_data = {
             "status": "success",
             "message": "CSV uploaded successfully! Analysis modules coming soon.",
