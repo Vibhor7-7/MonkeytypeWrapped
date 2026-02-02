@@ -22,12 +22,18 @@ interface ProcessingScreenProps {
 export function ProcessingScreen({ file, onComplete, onError }: ProcessingScreenProps) {
   const [messageIndex, setMessageIndex] = useState(0)
   const [progress, setProgress] = useState(0)
+  const [showColdStartNotice, setShowColdStartNotice] = useState(false)
 
   useEffect(() => {
     if (!file) {
       onError("No file provided")
       return
     }
+
+    // Show cold start notice after 3 seconds
+    const coldStartTimer = setTimeout(() => {
+      setShowColdStartNotice(true)
+    }, 3000)
 
     // Progress animation
     const progressInterval = setInterval(() => {
@@ -57,11 +63,13 @@ export function ProcessingScreen({ file, onComplete, onError }: ProcessingScreen
       .finally(() => {
         clearInterval(progressInterval)
         clearInterval(messageInterval)
+        clearTimeout(coldStartTimer)
       })
 
     return () => {
       clearInterval(progressInterval)
       clearInterval(messageInterval)
+      clearTimeout(coldStartTimer)
     }
   }, [file, onComplete, onError])
 
@@ -194,6 +202,35 @@ export function ProcessingScreen({ file, onComplete, onError }: ProcessingScreen
           </div>
           <p className="text-muted-foreground mt-4 font-mono text-sm">{progress}% complete</p>
         </div>
+
+        {/* Cold start notice */}
+        <AnimatePresence>
+          {showColdStartNotice && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mt-8 p-4 rounded-lg bg-primary/10 border border-primary/30 backdrop-blur-sm max-w-md mx-auto"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-medium text-foreground mb-1">
+                    Gathering compute resources...
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    First load may take up to 2 minutes while the server wakes up. 
+                    Subsequent loads will be instant!
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Floating key indicators */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
